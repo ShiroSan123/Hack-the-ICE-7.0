@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/Card';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 import { Benefit } from '@/shared/types';
 import { formatDate, formatCurrency } from '@/shared/lib/formatters';
 import { Link } from 'react-router-dom';
