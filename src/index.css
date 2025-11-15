@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+	:root {
+		/* High contrast for accessibility */
+		--background: 0 0% 98%;
+		--foreground: 0 0% 10%;
+
+		--card: 0 0% 100%;
+		--card-foreground: 0 0% 10%;
+
+		--popover: 0 0% 100%;
+		--popover-foreground: 0 0% 10%;
+
+		/* Warm green - trust and support */
+		--primary: 145 65% 45%;
+		--primary-foreground: 0 0% 100%;
+
+		/* Light background variant */
+		--secondary: 145 45% 95%;
+		--secondary-foreground: 145 65% 25%;
+
+		--muted: 0 0% 94%;
+		--muted-foreground: 0 0% 40%;
+
+		/* Warm orange - call to action */
+		--accent: 25 95% 55%;
+		--accent-foreground: 0 0% 100%;
+
+		--destructive: 0 84% 55%;
+		--destructive-foreground: 0 0% 100%;
+
+		--border: 0 0% 88%;
+		--input: 0 0% 92%;
+		--ring: 145 65% 45%;
+
+		--radius: 0.75rem;
+
+		/* Custom tokens for senior-friendly design */
+		--text-large: 1.125rem;
+		--text-xlarge: 1.5rem;
+		--text-huge: 2rem;
+		--transition-smooth: all 0.3s ease;
+
+		--sidebar-background: 0 0% 98%;
+		--sidebar-foreground: 0 0% 10%;
+		--sidebar-primary: 145 65% 45%;
+		--sidebar-primary-foreground: 0 0% 100%;
+		--sidebar-accent: 145 45% 95%;
+		--sidebar-accent-foreground: 145 65% 25%;
+		--sidebar-border: 0 0% 88%;
+		--sidebar-ring: 145 65% 45%;
+	}
+
+	.dark {
+		/* Keep light mode for seniors - dark mode not recommended */
+		--background: 0 0% 98%;
+		--foreground: 0 0% 10%;
+		--card: 0 0% 100%;
+		--card-foreground: 0 0% 10%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 0 0% 10%;
+		--primary: 145 65% 45%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 145 45% 95%;
+		--secondary-foreground: 145 65% 25%;
+		--muted: 0 0% 94%;
+		--muted-foreground: 0 0% 40%;
+		--accent: 25 95% 55%;
+		--accent-foreground: 0 0% 100%;
+		--destructive: 0 84% 55%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 0 0% 88%;
+		--input: 0 0% 92%;
+		--ring: 145 65% 45%;
+		--sidebar-background: 0 0% 98%;
+		--sidebar-foreground: 0 0% 10%;
+		--sidebar-primary: 145 65% 45%;
+		--sidebar-primary-foreground: 0 0% 100%;
+		--sidebar-accent: 145 45% 95%;
+		--sidebar-accent-foreground: 145 65% 25%;
+		--sidebar-border: 0 0% 88%;
+		--sidebar-ring: 145 65% 45%;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+		font-size: 1.125rem;
+		line-height: 1.6;
+	}
+
+	h1 {
+		@apply text-3xl md:text-4xl font-bold mb-4;
+	}
+
+	h2 {
+		@apply text-2xl md:text-3xl font-bold mb-3;
+	}
+
+	h3 {
+		@apply text-xl md:text-2xl font-semibold mb-2;
+	}
+}
+
+@layer utilities {
+	.text-accessible {
+		font-size: 1.125rem;
+		line-height: 1.6;
+	}
+
+	.text-large-accessible {
+		font-size: 1.5rem;
+		line-height: 1.5;
+	}
+
+	.text-huge-accessible {
+		font-size: 2rem;
+		line-height: 1.4;
+	}
+
+	.btn-large {
+		@apply min-h-[4rem] px-8 text-xl;
+	}
+
+	.btn-huge {
+		@apply min-h-[6rem] px-12 text-2xl md:text-3xl;
+	}
+}
+
+@media print {
+	body {
+		background: white;
+		font-size: 14pt;
+	}
+
+	.no-print {
+		display: none !important;
+	}
+
+	.print-friendly {
+		page-break-inside: avoid;
+	}
+}
