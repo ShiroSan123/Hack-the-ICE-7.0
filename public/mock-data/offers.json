@@ -1,0 +1,203 @@
+[
+	{
+		"id": "offer-1",
+		"title": "Скидка 20% на продукты в сети xxxxxxxxx",
+		"description": "Постоянная скидка 20% на все продукты питания по социальной карте для пенсионеров.",
+		"partner": "Торговая сеть xxxxxxxxx",
+		"discount": 20,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Продукты"
+	},
+	{
+		"id": "offer-2",
+		"title": "Бесплатная доставка лекарств",
+		"description": "Бесплатная доставка лекарств на дом при заказе от 500 рублей.",
+		"partner": "Аптечная сеть xxxxxxxxx",
+		"discount": 100,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"disabled"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Медицина"
+	},
+	{
+		"id": "offer-3",
+		"title": "Скидка 15% на обувь и одежду",
+		"description": "Постоянная скидка 15% на всю обувь и одежду для пенсионеров и инвалидов.",
+		"partner": "Магазин Одежда+ xxxxxxxxx",
+		"discount": 15,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"disabled"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Одежда"
+	},
+	{
+		"id": "offer-4",
+		"title": "Скидка 30% на ремонт обуви",
+		"description": "Скидка 30% на все услуги по ремонту обуви для пенсионеров.",
+		"partner": "Мастерская Каблучок xxxxxxxxx",
+		"discount": 30,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-06-30",
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Услуги"
+	},
+	{
+		"id": "offer-5",
+		"title": "Бесплатная консультация юриста",
+		"description": "Одна бесплатная консультация юриста в месяц для льготных категорий.",
+		"partner": "Юридическая служба xxxxxxxxx",
+		"discount": 100,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"disabled",
+			"veteran"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Юридические услуги"
+	},
+	{
+		"id": "offer-6",
+		"title": "Скидка 25% на медицинские анализы",
+		"description": "Скидка 25% на все виды лабораторных анализов в частной клинике.",
+		"partner": "Медицинский центр Здоровье xxxxxxxxx",
+		"discount": 25,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"veteran"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Медицина"
+	},
+	{
+		"id": "offer-7",
+		"title": "Бесплатная стрижка раз в месяц",
+		"description": "Одна бесплатная стрижка в месяц для пенсионеров старше 75 лет.",
+		"partner": "Парикмахерская Стиль xxxxxxxxx",
+		"discount": 100,
+		"validFrom": "2024-03-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Услуги"
+	},
+	{
+		"id": "offer-8",
+		"title": "Скидка 10% на услуги химчистки",
+		"description": "Постоянная скидка 10% на все услуги химчистки для льготных категорий.",
+		"partner": "Химчистка Чисто xxxxxxxxx",
+		"discount": 10,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"disabled",
+			"veteran"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Услуги"
+	},
+	{
+		"id": "offer-9",
+		"title": "Скидка 50% на массаж",
+		"description": "Скидка 50% на первый сеанс лечебного массажа в медицинском центре.",
+		"partner": "Центр реабилитации xxxxxxxxx",
+		"discount": 50,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"disabled"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Медицина"
+	},
+	{
+		"id": "offer-10",
+		"title": "Бесплатные курсы компьютерной грамотности",
+		"description": "Бесплатное обучение работе с компьютером и интернетом для пенсионеров.",
+		"partner": "Библиотека им. Ленина xxxxxxxxx",
+		"discount": 100,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Образование"
+	},
+	{
+		"id": "offer-11",
+		"title": "Скидка 15% на товары для дома",
+		"description": "Постоянная скидка 15% на товары для дома и бытовую химию.",
+		"partner": "Магазин Всё для дома xxxxxxxxx",
+		"discount": 15,
+		"validFrom": "2024-01-01",
+		"validTo": "2024-12-31",
+		"targetGroups": [
+			"pensioner",
+			"veteran"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Товары для дома"
+	},
+	{
+		"id": "offer-12",
+		"title": "Бесплатные занятия йогой",
+		"description": "Два бесплатных занятия йогой в неделю для пенсионеров в парке.",
+		"partner": "Спортивный клуб Здоровье xxxxxxxxx",
+		"discount": 100,
+		"validFrom": "2024-04-01",
+		"validTo": "2024-10-31",
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"xxxxxxxxx"
+		],
+		"category": "Спорт"
+	}
+]

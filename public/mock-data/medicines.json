@@ -1,0 +1,84 @@
+[
+	{
+		"id": "med-1",
+		"name": "Эналаприл",
+		"dosage": "10 мг",
+		"frequency": "2 раза в день",
+		"prescribedBy": "Кардиолог Иванова А.П.",
+		"prescribedDate": "2024-01-15",
+		"refillDate": "2024-03-15",
+		"relatedBenefitIds": [
+			"benefit-3"
+		],
+		"relatedOfferIds": [
+			"offer-2"
+		],
+		"monthlyPrice": 450,
+		"discountedPrice": 0
+	},
+	{
+		"id": "med-2",
+		"name": "Аспирин Кардио",
+		"dosage": "100 мг",
+		"frequency": "1 раз в день",
+		"prescribedBy": "Кардиолог Иванова А.П.",
+		"prescribedDate": "2024-01-15",
+		"refillDate": "2024-03-15",
+		"relatedBenefitIds": [
+			"benefit-3"
+		],
+		"relatedOfferIds": [
+			"offer-2"
+		],
+		"monthlyPrice": 320,
+		"discountedPrice": 0
+	},
+	{
+		"id": "med-3",
+		"name": "Метформин",
+		"dosage": "850 мг",
+		"frequency": "2 раза в день",
+		"prescribedBy": "Эндокринолог Петров В.С.",
+		"prescribedDate": "2024-02-01",
+		"refillDate": "2024-04-01",
+		"relatedBenefitIds": [
+			"benefit-3"
+		],
+		"relatedOfferIds": [
+			"offer-2",
+			"offer-6"
+		],
+		"monthlyPrice": 280,
+		"discountedPrice": 0
+	},
+	{
+		"id": "med-4",
+		"name": "Омепразол",
+		"dosage": "20 мг",
+		"frequency": "1 раз в день утром",
+		"prescribedBy": "Гастроэнтеролог Сидорова О.Н.",
+		"prescribedDate": "2023-12-10",
+		"refillDate": "2024-02-10",
+		"relatedBenefitIds": [],
+		"relatedOfferIds": [
+			"offer-2"
+		],
+		"monthlyPrice": 180,
+		"discountedPrice": 135
+	},
+	{
+		"id": "med-5",
+		"name": "Витамин D3",
+		"dosage": "2000 МЕ",
+		"frequency": "1 раз в день",
+		"prescribedBy": "Терапевт Козлова М.И.",
+		"prescribedDate": "2024-01-20",
+		"refillDate": "2024-04-20",
+		"relatedBenefitIds": [],
+		"relatedOfferIds": [
+			"offer-2"
+		],
+		"monthlyPrice": 250,
+		"discountedPrice": 225
+	}
+]
