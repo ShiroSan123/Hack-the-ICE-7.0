@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/shared/ui/Layout';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { benefitsApi } from '@/shared/api/benefitsApi';
 import { useAppStore } from '@/shared/store/useAppStore';
