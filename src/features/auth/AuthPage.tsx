@@ -1,36 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/shared/ui/Card';
 import { useAppStore } from '@/shared/store/useAppStore';
 import { Heart } from 'lucide-react';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './AuthContext';
 
 export const AuthPage = () => {
-	const [phone, setPhone] = useState('');
-	const [loading, setLoading] = useState(false);
+	const { user: authUser, loading: authLoading } = useAuth();
 	const { setUser } = useAppStore();
 	const navigate = useNavigate();
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-	const handleLogin = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setLoading(true);
+	useEffect(() => {
+		if (authLoading) return;
+		if (!authUser) return;
 
-		// Mock login
-		setTimeout(() => {
-			setUser({
-				id: 'user-1',
-				phone,
-				region: 'xxxxxxxxx',
-				category: 'pensioner',
-				interests: [],
-				role: 'self',
-				simpleModeEnabled: true,
-				name: 'Пользователь',
-			});
-			setLoading(false);
-			navigate('/dashboard');
-		}, 500);
-	};
+		// мапим Supabase user в твой стор
+		setUser({
+			id: authUser.id,
+			phone: '',
+			region: 'xxxxxxxxx',
+			category: 'pensioner',
+			interests: [],
+			role: 'self',
+			simpleModeEnabled: true,
+			name: authUser.email ?? 'Пользователь',
+		});
+
+		navigate('/dashboard', { replace: true });
+	}, [authUser, authLoading, navigate, setUser]);
 
 	return (
 		<div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -44,38 +50,24 @@ export const AuthPage = () => {
 						Социальный навигатор «Поддержка++»
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleLogin} className="space-y-6">
-						<div>
-							<label htmlFor="phone" className="block text-lg font-medium mb-2">
-								Телефон или Email
-							</label>
-							<input
-								id="phone"
-								type="text"
-								value={phone}
-								onChange={(e) => setPhone(e.target.value)}
-								placeholder="+7 (___) ___-__-__"
-								className="w-full h-14 px-4 text-lg rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								required
-							/>
-						</div>
 
-						<Button
-							type="submit"
-							size="lg"
-							className="w-full"
-							disabled={loading || !phone}
-						>
-							{loading ? 'Вход...' : 'Войти'}
-						</Button>
+				<CardContent className="space-y-4">
+					<Button
+						type="button"
+						size="lg"
+						className="w-full"
+						onClick={() => setIsAuthOpen(true)}
+					>
+						Войти / Зарегистрироваться
+					</Button>
 
-						<p className="text-center text-sm text-muted-foreground">
-							При первом входе будет создан новый профиль
-						</p>
-					</form>
+					<p className="text-center text-sm text-muted-foreground">
+						При первом входе будет создан новый профиль
+					</p>
 				</CardContent>
 			</Card>
+
+			{isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
 		</div>
 	);
 };
