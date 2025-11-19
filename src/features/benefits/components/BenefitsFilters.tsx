@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/shared/ui/Card';
+import { cn } from '@/lib/utils';
 
 interface FiltersProps {
 	searchQuery: string;
@@ -25,37 +26,48 @@ export const BenefitsFilters = ({
 	];
 
 	return (
-		<Card>
-			<CardContent className="pt-6 space-y-4">
+		<Card className="rounded-3xl border border-border/80 bg-white">
+			<CardContent className="pt-6 space-y-6">
 				<div>
-					<label className="block text-base font-medium mb-2">
-						Поиск по названию
-					</label>
+					<p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-2">
+						Найти льготу
+					</p>
 					<input
 						type="text"
 						value={searchQuery}
 						onChange={(e) => onSearchChange(e.target.value)}
-						placeholder="Введите название льготы..."
-						className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						placeholder="Введите название или партнёра"
+						className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 					/>
 				</div>
 
-				<div>
-					<label className="block text-base font-medium mb-2">
-						Тип льготы
-					</label>
-					<select
-						value={selectedType}
-						onChange={(e) => onTypeChange(e.target.value)}
-						className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					>
-						{types.map((type) => (
-							<option key={type.value} value={type.value}>
-								{type.label}
-							</option>
-						))}
-					</select>
+				<div className="space-y-3">
+					<p className="text-base font-semibold">Тип льготы</p>
+					<div className="flex flex-wrap gap-2">
+						{types.map((type) => {
+							const active = selectedType === type.value;
+							return (
+								<button
+									key={type.value}
+									type="button"
+									onClick={() => onTypeChange(type.value)}
+									className={cn(
+										'rounded-2xl border px-4 py-2 text-sm font-semibold transition-all',
+										active
+											? 'border-primary bg-primary/10 text-primary shadow-sm'
+											: 'border-border text-muted-foreground hover:border-primary/50'
+									)}
+								>
+									{type.label}
+								</button>
+							);
+						})}
+					</div>
 				</div>
+
+				<p className="text-sm text-muted-foreground">
+					Фильтруйте по типу или по названию. В карточке будет список документов и шагов, чтобы сразу перейти к действию.
+				</p>
 			</CardContent>
 		</Card>
 	);

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { useAppStore } from '@/shared/store/useAppStore';
 import { formatSnils } from '@/shared/lib/formatters';
 import { toast } from 'sonner';
+import { MessageCircle, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const ProfilePage = () => {
 	const { user, setUser, setSimpleMode } = useAppStore();
@@ -48,103 +50,98 @@ export const ProfilePage = () => {
 	};
 
 	return (
-		<Layout title="Профиль">
-			<div className="max-w-2xl mx-auto">
-				<Card>
+		<Layout title="Профиль и настройки">
+			<div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+				<Card className="rounded-3xl">
 					<CardHeader>
-						<CardTitle>Личные данные</CardTitle>
-						<CardDescription>
-							Укажите ваши данные для персонализации льгот
-						</CardDescription>
+						<CardTitle>Данные для персонализации</CardTitle>
+						<CardDescription>Обновите регион, категорию и предпочтения, чтобы подсказки были точнее.</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-6">
-							<div>
-								<label className="block text-base font-medium mb-2">
-									Имя
+							<div className="grid gap-4 md:grid-cols-2">
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">Имя</span>
+									<input
+										type="text"
+										value={formData.name}
+										onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+										className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										placeholder="Ваше имя"
+									/>
 								</label>
-								<input
-									type="text"
-									value={formData.name}
-									onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-									className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									placeholder="Ваше имя"
-								/>
+
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">Регион</span>
+									<input
+										type="text"
+										value={formData.region}
+										onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+										className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										required
+									/>
+								</label>
+
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">Категория льготника</span>
+									<select
+										value={formData.category}
+										onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+										className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										required
+									>
+										<option value="pensioner">Пенсионер</option>
+										<option value="disabled">Инвалид</option>
+										<option value="veteran">Ветеран</option>
+										<option value="large-family">Многодетная семья</option>
+										<option value="low-income">Малоимущий</option>
+									</select>
+								</label>
+
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">СНИЛС</span>
+									<input
+										type="text"
+										value={formatSnils(formData.snils)}
+										onChange={(e) => handleSnilsChange(e.target.value)}
+										className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										placeholder="___-___-___ __"
+										maxLength={14}
+									/>
+								</label>
 							</div>
 
-							<div>
-								<label className="block text-base font-medium mb-2">
-									Регион
+							<div className="grid gap-4 md:grid-cols-2">
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">Кто использует приложение</span>
+									<select
+										value={formData.role}
+										onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+										className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										required
+									>
+										<option value="self">Я использую для себя</option>
+										<option value="relative">Помогаю родственнику</option>
+									</select>
 								</label>
-								<input
-									type="text"
-									value={formData.region}
-									onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-									className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									required
-								/>
-							</div>
 
-							<div>
-								<label className="block text-base font-medium mb-2">
-									Категория льготника
-								</label>
-								<select
-									value={formData.category}
-									onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-									className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									required
-								>
-									<option value="pensioner">Пенсионер</option>
-									<option value="disabled">Инвалид</option>
-									<option value="veteran">Ветеран</option>
-									<option value="large-family">Многодетная семья</option>
-									<option value="low-income">Малоимущий</option>
-								</select>
-							</div>
-
-							<div>
-								<label className="block text-base font-medium mb-2">
-									СНИЛС
-								</label>
-								<input
-									type="text"
-									value={formatSnils(formData.snils)}
-									onChange={(e) => handleSnilsChange(e.target.value)}
-									className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									placeholder="___-___-___ __"
-									maxLength={14}
-								/>
-							</div>
-
-							<div>
-								<label className="block text-base font-medium mb-2">
-									Кто использует приложение
-								</label>
-								<select
-									value={formData.role}
-									onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-									className="w-full h-12 px-4 text-base rounded-lg border-2 border-input bg-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									required
-								>
-									<option value="self">Я использую для себя</option>
-									<option value="relative">Помогаю родственнику</option>
-								</select>
-							</div>
-
-							<div className="flex items-center gap-3 p-4 bg-secondary rounded-lg">
-								<input
-									type="checkbox"
-									id="simpleMode"
-									checked={formData.simpleModeEnabled}
-									onChange={(e) => {
-										setFormData({ ...formData, simpleModeEnabled: e.target.checked });
-										setSimpleMode(e.target.checked);
-									}}
-									className="w-6 h-6 rounded border-2 border-primary"
-								/>
-								<label htmlFor="simpleMode" className="text-base font-medium cursor-pointer">
-									Упрощённый режим (крупные кнопки, озвучка)
+								<label className="space-y-2">
+									<span className="text-sm font-semibold">Упрощённый режим</span>
+									<div className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3">
+										<input
+											type="checkbox"
+											id="simpleMode"
+											checked={formData.simpleModeEnabled}
+											onChange={(e) => {
+												setFormData({ ...formData, simpleModeEnabled: e.target.checked });
+												setSimpleMode(e.target.checked);
+											}}
+											className="h-5 w-5 rounded border-2 border-primary"
+										/>
+										<label htmlFor="simpleMode" className="text-base">
+											Крупные элементы, озвучка и простая навигация
+										</label>
+									</div>
 								</label>
 							</div>
 
@@ -154,6 +151,33 @@ export const ProfilePage = () => {
 						</form>
 					</CardContent>
 				</Card>
+
+				<div className="space-y-4">
+					<Card className="rounded-3xl bg-secondary">
+						<CardHeader>
+							<CardTitle>Как работает простой режим</CardTitle>
+							<CardDescription>Крупные кнопки, голосовые подсказки и быстрый доступ к печати. Можно включить по умолчанию.</CardDescription>
+						</CardHeader>
+					</Card>
+
+					<Card className="rounded-3xl">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<MessageCircle className="w-5 h-5 text-primary" />Нужна помощь?
+							</CardTitle>
+							<CardDescription>Горячая линия 122 или наш чат-бот подскажут шаги и документы.</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<Button variant="accent" size="lg" asChild className="w-full">
+								<Link to="/assistant">Открыть чат-бота</Link>
+							</Button>
+							<div className="rounded-2xl border border-border px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
+								<ShieldCheck className="w-4 h-4 text-primary" />
+								Персональные данные хранятся локально и используются только для рекомендаций.
+							</div>
+						</CardContent>
+					</Card>
+				</div>
 			</div>
 		</Layout>
 	);

@@ -1,12 +1,21 @@
-import { ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ReactNode, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Home, User, Heart, Pill, Grid3X3, FileText } from 'lucide-react';
-import { useState } from 'react';
+import {
+	LayoutDashboard,
+	MessageCircle,
+	Menu,
+	Pill,
+	FileText,
+	User,
+	Heart,
+	X,
+} from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { supabase } from '@/shared/lib/supabaseClient';
 import { useAuth } from '@/features/auth/AuthContext';
-
+import { cn } from '@/lib/utils';
+import { ModeSwitch } from './ModeSwitch';
 
 interface LayoutProps {
 	children: ReactNode;
@@ -18,6 +27,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 	const { user, logout } = useAppStore();
 	const { setManualUser } = useAuth();
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const handleLogout = async () => {
 		try {
@@ -32,99 +42,151 @@ export const Layout = ({ children, title }: LayoutProps) => {
 	};
 
 	const navigation = [
-		{ name: 'Главная', to: '/dashboard', icon: Home },
-		{ name: 'Льготы', to: '/benefits', icon: Heart },
-		{ name: 'Аптечка', to: '/apteka', icon: Pill },
-		{ name: 'Профиль', to: '/profile', icon: User },
+		{ name: 'Главная', to: '/dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+		{ name: 'Льготы', to: '/benefits', icon: Heart, match: ['/benefits'] },
+		{ name: 'Аптечка', to: '/apteka', icon: Pill, match: ['/apteka'] },
+		{ name: 'Ассистент', to: '/assistant', icon: MessageCircle, match: ['/assistant'] },
+		{ name: 'Профиль', to: '/profile', icon: User, match: ['/profile'] },
+		{ name: 'Печать', to: '/print', icon: FileText, match: ['/print'] },
 	];
 
-	if (user?.simpleModeEnabled) {
-		navigation.push({ name: 'Простой режим', to: '/simple', icon: Grid3X3 });
-	}
+	const categoryLabel = useMemo(() => {
+		if (!user?.category) return null;
+		const map: Record<string, string> = {
+			pensioner: 'Пенсионер',
+			disabled: 'Инвалид',
+			veteran: 'Ветеран',
+			'large-family': 'Многодетная семья',
+			'low-income': 'Малоимущий',
+		};
+		return map[user.category] ?? user.category;
+	}, [user?.category]);
+
+	const isLinkActive = (match?: string[]) => {
+		if (!match || match.length === 0) return false;
+		return match.some((prefix) => location.pathname.startsWith(prefix));
+	};
 
 	return (
-		<div className="min-h-screen bg-background">
-			<header className="sticky top-0 z-50 w-full border-b-2 border-border bg-card shadow-md no-print">
-				<div className="container mx-auto flex h-16 md:h-20 items-center justify-between px-4">
-					<Link to="/dashboard" className="flex items-center gap-3">
-						<div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary flex items-center justify-center">
-							<Heart className="w-6 h-6 md:w-7 md:h-7 text-primary-foreground" />
+		<div className="min-h-screen bg-slate-50 text-foreground flex flex-col">
+			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+				<div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent border-b border-primary/20">
+					<div className="container mx-auto px-4 py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+						<p className="font-semibold">Социальный навигатор для помощи льготникам</p>
+						<div className="flex flex-wrap gap-4 text-primary/80">
+							<span>Горячая линия: 122</span>
+							<span>Регион: {user?.region || 'xxxxxxxxx'}</span>
+							{categoryLabel && <span>Категория: {categoryLabel}</span>}
 						</div>
-						<span className="text-xl md:text-2xl font-bold text-foreground">Поддержка++</span>
+					</div>
+				</div>
+
+				<div className="container mx-auto flex items-center gap-4 px-4 py-3">
+					<Link to="/dashboard" className="flex items-center gap-3">
+						<div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
+							<Heart className="w-6 h-6" />
+						</div>
+						<div>
+							<p className="text-xl font-bold leading-tight">Поддержка++</p>
+							<p className="text-sm text-muted-foreground">все льготы в одном окне</p>
+						</div>
 					</Link>
 
-					<nav className="hidden md:flex items-center gap-2">
-						{navigation.map((item) => (
-							<Button
-								key={item.to}
-								variant="ghost"
-								size="default"
-								asChild
-							>
-								<Link to={item.to} className="flex items-center gap-2">
-									<item.icon className="w-5 h-5" />
+					<nav className="hidden lg:flex items-center gap-2 flex-1">
+						{navigation.map((item) => {
+							const active = isLinkActive(item.match);
+							return (
+								<Link
+									key={item.to}
+									to={item.to}
+									className={cn(
+										'flex items-center gap-2 rounded-2xl px-4 py-2 text-base font-semibold transition-all',
+										active
+											? 'bg-primary/10 text-primary shadow-sm'
+											: 'text-muted-foreground hover:text-primary hover:bg-primary/5'
+									)}
+								>
+									<item.icon className="w-4 h-4" />
 									{item.name}
 								</Link>
-							</Button>
-						))}
+							);
+						})}
+					</nav>
+
+					<div className="hidden md:flex items-center gap-3">
+						<ModeSwitch />
 						{user && (
-							<Button variant="outline" size="default" onClick={handleLogout}>
+							<Button variant="outline" size="sm" onClick={handleLogout}>
 								Выйти
 							</Button>
 						)}
-					</nav>
+					</div>
 
-					<Button
-						variant="ghost"
-						size="icon"
-						className="md:hidden"
-						onClick={() => setMenuOpen(!menuOpen)}
-						aria-label="Меню"
-					>
-						{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-					</Button>
+					<div className="ml-auto flex items-center gap-2 md:hidden">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setMenuOpen((prev) => !prev)}
+							aria-label="Открыть меню"
+						>
+							{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+						</Button>
+					</div>
 				</div>
 
 				{menuOpen && (
-					<div className="md:hidden border-t-2 border-border bg-card">
-						<nav className="container mx-auto flex flex-col gap-2 p-4">
-							{navigation.map((item) => (
-								<Button
-									key={item.to}
-									variant="ghost"
-									size="lg"
-									asChild
-									onClick={() => setMenuOpen(false)}
-								>
-									<Link to={item.to} className="flex items-center gap-3 justify-start">
-										<item.icon className="w-6 h-6" />
+					<div className="border-t border-border/80 bg-white md:hidden">
+						<div className="container mx-auto px-4 py-4 space-y-4">
+							<ModeSwitch className="w-full" />
+							<nav className="flex flex-col gap-2">
+								{navigation.map((item) => (
+									<Link
+										key={item.to}
+										to={item.to}
+										onClick={() => setMenuOpen(false)}
+										className="flex items-center gap-3 rounded-2xl px-4 py-3 text-lg font-semibold text-foreground hover:bg-primary/5"
+									>
+										<item.icon className="w-5 h-5" />
 										{item.name}
 									</Link>
-								</Button>
-							))}
+								))}
+							</nav>
 							{user && (
-								<Button variant="outline" size="lg" onClick={handleLogout}>
+								<Button variant="outline" size="lg" className="w-full" onClick={handleLogout}>
 									Выйти
 								</Button>
 							)}
-						</nav>
+						</div>
 					</div>
 				)}
 			</header>
 
-			<main className="container mx-auto px-4 py-6 md:py-8">
+			<main className="container mx-auto flex-1 w-full px-4 py-8 md:py-10">
 				{title && (
-					<h1 className="mb-6 md:mb-8 text-3xl md:text-4xl font-bold text-foreground">
-						{title}
-					</h1>
+					<div className="mb-8 space-y-2">
+						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Поддержка++</p>
+						<h1 className="text-3xl md:text-4xl font-bold text-slate-900">{title}</h1>
+					</div>
 				)}
 				{children}
 			</main>
 
-			<footer className="border-t-2 border-border bg-card mt-12 no-print">
-				<div className="container mx-auto px-4 py-6 text-center text-muted-foreground">
-					<p className="text-base">© 2024 Поддержка++. Социальный навигатор для граждан.</p>
-					<p className="text-sm mt-2">Регион: {user?.region || 'xxxxxxxxx'}</p>
+			<footer className="border-t border-border bg-white mt-12 no-print">
+				<div className="container mx-auto px-4 py-8 grid gap-6 text-sm text-muted-foreground md:grid-cols-3">
+					<div>
+						<p className="font-semibold text-foreground">Поддержка++</p>
+						<p className="mt-2">Цифровой помощник рассказывает, какие льготы, скидки и выплаты положены малозащищённым гражданам.</p>
+					</div>
+					<div>
+						<p className="font-semibold text-foreground">Контакты</p>
+						<p className="mt-2">Горячая линия: 122</p>
+						<p>Справочная: +7 (800) 700-00-00</p>
+					</div>
+					<div>
+						<p className="font-semibold text-foreground">Регион</p>
+						<p className="mt-2">{user?.region || 'xxxxxxxxx'}</p>
+						<p>© 2024 Социальный навигатор</p>
+					</div>
 				</div>
 			</footer>
 		</div>

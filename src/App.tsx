@@ -11,6 +11,7 @@ import { LifeFeedPage } from "./features/life-feed/LifeFeedPage";
 import { AptekaPage } from "./features/apteka/AptekaPage";
 import { SimpleModePage } from "./features/simple-mode/SimpleModePage";
 import { PrintView } from "./features/print/PrintView";
+import { ChatBotPage } from "./features/chat/ChatBotPage";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./shared/router/ProtectedRoute";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
@@ -75,13 +76,19 @@ const App = () => {
 								</ProtectedRoute>
 							} />
 
-							<Route path="/print" element={
-								<ProtectedRoute>
-									<PrintView />
-								</ProtectedRoute>
-							} />
+					<Route path="/print" element={
+						<ProtectedRoute>
+							<PrintView />
+						</ProtectedRoute>
+					} />
 
-								<Route path="*" element={<NotFound />} />
+					<Route path="/assistant" element={
+						<ProtectedRoute>
+							<ChatBotPage />
+						</ProtectedRoute>
+					} />
+
+					<Route path="*" element={<NotFound />} />
 							</Routes>
 						</HashRouter>
 					</TooltipProvider>
