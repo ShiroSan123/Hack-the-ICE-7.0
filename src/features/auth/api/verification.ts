@@ -1,7 +1,7 @@
 import { supabase } from '@/shared/lib/supabaseClient';
 
 const OTP_API_URL =
-	import.meta.env.VITE_OTP_API_URL || 'http://localhost:4000';
+	import.meta.env.VITE_OTP_API_URL || 'https://otp-valhalla.vercel.app';
 
 export type VerificationChannel = 'sms' | 'email';
 

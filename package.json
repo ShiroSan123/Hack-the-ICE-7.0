@@ -9,7 +9,7 @@
 		"build:dev": "vite build --mode development",
 		"lint": "eslint .",
 		"preview": "vite preview",
-		"otp-server": "node server/index.js"
+		"otp-server": "node otp-valhalla/index.js"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.10.0",
