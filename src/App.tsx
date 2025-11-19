@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAppStore } from "./shared/store/useAppStore";
 import { AuthPage } from "./features/auth/AuthPage";
 import { ProfilePage } from "./features/profile/ProfilePage";
 import { BenefitsListPage } from "./features/benefits/BenefitsListPage";
@@ -14,13 +13,21 @@ import { SimpleModePage } from "./features/simple-mode/SimpleModePage";
 import { PrintView } from "./features/print/PrintView";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./shared/router/ProtectedRoute";
-import { AuthProvider } from "./features/auth/AuthContext";
+import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-	const { user } = useAppStore();
+const AuthEntryRoute = () => {
+	const { user } = useAuth();
+	return user ? <Navigate to="/dashboard" replace /> : <AuthPage />;
+};
 
+const RootRoute = () => {
+	const { user } = useAuth();
+	return <Navigate to={user ? "/dashboard" : "/auth"} replace />;
+};
+
+const App = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AuthProvider>
@@ -29,8 +36,8 @@ const App = () => {
 					<Sonner />
 					<BrowserRouter>
 						<Routes>
-							<Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-							<Route path="/" element={<Navigate to={user ? "/dashboard" : "/auth"} replace />} />
+							<Route path="/auth" element={<AuthEntryRoute />} />
+							<Route path="/" element={<RootRoute />} />
 
 							<Route path="/dashboard" element={
 								<ProtectedRoute>
