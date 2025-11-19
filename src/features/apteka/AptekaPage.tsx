@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '@/shared/ui/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
-import { apiClient } from '@/shared/api/apiClient';
+import { medicinesApi } from '@/shared/api/medicinesApi';
 import { Medicine } from '@/shared/types';
 import { useAppStore } from '@/shared/store/useAppStore';
 import { MedicineCard } from './MedicineCard';
@@ -16,7 +16,7 @@ export const AptekaPage = () => {
 	useEffect(() => {
 		const loadMedicines = async () => {
 			try {
-				const data = await apiClient.get<Medicine[]>('/mock-data/medicines.json');
+				const data = await medicinesApi.getAll();
 				setMedicines(data);
 				setStoreMedicines(data);
 			} catch (error) {
