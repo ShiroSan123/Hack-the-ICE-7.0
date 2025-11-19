@@ -15,7 +15,7 @@ export const ProtectedRoute = ({ children }: Props) => {
 
 	// если авторизации нет – редирект
 	if (!user) {
-		return <Navigate to="/" replace />;
+		return <Navigate to="/auth" replace />;
 	}
 
 	// если всё ок – рендерим контент

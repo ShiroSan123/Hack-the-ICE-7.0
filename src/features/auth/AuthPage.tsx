@@ -23,16 +23,18 @@ export const AuthPage = () => {
 		if (authLoading) return;
 		if (!authUser) return;
 
-		// мапим Supabase user в твой стор
+		const displayName = authUser.email || authUser.phone || 'Пользователь';
+
 		setUser({
 			id: authUser.id,
-			phone: '',
+			phone: authUser.phone ?? '',
+			email: authUser.email,
 			region: 'xxxxxxxxx',
 			category: 'pensioner',
 			interests: [],
 			role: 'self',
 			simpleModeEnabled: true,
-			name: authUser.email ?? 'Пользователь',
+			name: displayName,
 		});
 
 		navigate('/dashboard', { replace: true });

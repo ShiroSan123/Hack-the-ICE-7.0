@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Home, User, Heart, Pill, Grid3X3, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { supabase } from '@/shared/lib/supabaseClient';
+import { useAuth } from '@/features/auth/AuthContext';
+
 
 interface LayoutProps {
 	children: ReactNode;
@@ -13,11 +16,19 @@ interface LayoutProps {
 export const Layout = ({ children, title }: LayoutProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const { user, logout } = useAppStore();
+	const { setManualUser } = useAuth();
 	const navigate = useNavigate();
 
-	const handleLogout = () => {
-		logout();
-		navigate('/auth');
+	const handleLogout = async () => {
+		try {
+			await supabase.auth.signOut();
+		} catch (error) {
+			console.error('signOut error:', error);
+		} finally {
+			setManualUser(null);
+			logout();
+			navigate('/auth');
+		}
 	};
 
 	const navigation = [

@@ -10,20 +10,33 @@ import { supabase } from '@/shared/lib/supabaseClient';
 type AuthUser = {
 	id: string;
 	email?: string;
+	phone?: string;
 };
 
 type AuthContextValue = {
 	user: AuthUser | null;
 	loading: boolean;
+	setManualUser: (user: AuthUser | null) => void;
 };
 
 const AuthContext = createContext<AuthContextValue>({
 	user: null,
 	loading: true,
+	setManualUser: () => undefined,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [user, setUser] = useState<AuthUser | null>(null);
+	const [sessionUser, setSessionUser] = useState<AuthUser | null>(null);
+	const [manualUser, setManualUserState] = useState<AuthUser | null>(() => {
+		if (typeof window === 'undefined') return null;
+		const stored = window.localStorage.getItem('support-plus-manual-user');
+		if (!stored) return null;
+		try {
+			return JSON.parse(stored) as AuthUser;
+		} catch (_e) {
+			return null;
+		}
+	});
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -46,9 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				}
 
 				if (data.user) {
-					setUser({
+					setSessionUser({
 						id: data.user.id,
 						email: data.user.email ?? undefined,
+						phone: data.user.phone ?? data.user.user_metadata?.phone ?? undefined,
 					});
 				}
 			} finally {
@@ -64,12 +78,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (!isMounted) return;
 
 			if (session?.user) {
-				setUser({
+				setSessionUser({
 					id: session.user.id,
 					email: session.user.email ?? undefined,
+					phone: session.user.phone ?? session.user.user_metadata?.phone ?? undefined,
 				});
 			} else {
-				setUser(null);
+				setSessionUser(null);
 			}
 		});
 
@@ -79,9 +94,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (sessionUser) {
+			setManualUserState(null);
+			if (typeof window !== 'undefined') {
+				window.localStorage.removeItem('support-plus-manual-user');
+			}
+		}
+	}, [sessionUser]);
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		if (manualUser) {
+			window.localStorage.setItem(
+				'support-plus-manual-user',
+				JSON.stringify(manualUser)
+			);
+		} else {
+			window.localStorage.removeItem('support-plus-manual-user');
+		}
+	}, [manualUser]);
+
+	const handleSetManualUser = (value: AuthUser | null) => {
+		setManualUserState(value);
+	};
+
 	const value: AuthContextValue = {
-		user,
+		user: manualUser ?? sessionUser,
 		loading,
+		setManualUser: handleSetManualUser,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
