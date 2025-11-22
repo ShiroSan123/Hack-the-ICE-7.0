@@ -68,8 +68,8 @@ export const Layout = ({ children, title }: LayoutProps) => {
 	};
 
 	return (
-		<div className="min-h-screen bg-slate-50 text-foreground flex flex-col">
-			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+		<div className="min-h-screen min-h-dvh bg-slate-50 text-foreground flex flex-col">
+			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 safe-area-top safe-area-horizontal">
 				<div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent border-b border-primary/20">
 					<div className="container mx-auto px-4 py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 						<p className="font-semibold">Социальный навигатор для помощи льготникам</p>
@@ -161,7 +161,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				)}
 			</header>
 
-			<main className="container mx-auto flex-1 w-full px-4 py-8 md:py-10">
+			<main className="container mx-auto flex-1 w-full px-4 py-8 md:py-10 safe-area-horizontal">
 				{title && (
 					<div className="mb-8 space-y-2">
 						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Поддержка++</p>
@@ -171,7 +171,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				{children}
 			</main>
 
-			<footer className="border-t border-border bg-white mt-12 no-print">
+			<footer className="border-t border-border bg-white mt-12 no-print safe-area-horizontal safe-area-bottom">
 				<div className="container mx-auto px-4 py-8 grid gap-6 text-sm text-muted-foreground md:grid-cols-3">
 					<div>
 						<p className="font-semibold text-foreground">Поддержка++</p>
