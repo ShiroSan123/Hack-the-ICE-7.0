@@ -52,8 +52,8 @@ export const SimpleModePage = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex flex-col items-center p-4">
-			<div className="w-full max-w-5xl space-y-8">
+		<div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex flex-col safe-area-top safe-area-bottom">
+			<div className="app-shell w-full max-w-5xl space-y-8 py-6">
 				<div className="flex flex-col gap-4 rounded-3xl bg-white/80 p-6 shadow-sm">
 					<ModeSwitch />
 					<div className="text-center space-y-2">

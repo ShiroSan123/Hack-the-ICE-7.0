@@ -69,9 +69,9 @@ export const Layout = ({ children, title }: LayoutProps) => {
 
 	return (
 		<div className="min-h-screen min-h-dvh bg-slate-50 text-foreground flex flex-col">
-			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 safe-area-top safe-area-horizontal">
+			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 safe-area-top">
 				<div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent border-b border-primary/20">
-					<div className="container mx-auto px-4 py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+					<div className="app-shell py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 						<p className="font-semibold">Социальный навигатор для помощи льготникам</p>
 						<div className="flex flex-wrap gap-4 text-primary/80">
 							<span>Горячая линия: 122</span>
@@ -81,7 +81,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 					</div>
 				</div>
 
-				<div className="container mx-auto flex items-center gap-4 px-4 py-3">
+				<div className="app-shell flex items-center gap-4 py-3">
 					<Link to="/dashboard" className="flex items-center gap-3">
 						<div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
 							<Heart className="w-6 h-6" />
@@ -136,7 +136,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 
 				{menuOpen && (
 					<div className="border-t border-border/80 bg-white md:hidden">
-						<div className="container mx-auto px-4 py-4 space-y-4">
+						<div className="app-shell py-4 space-y-4">
 							<ModeSwitch className="w-full" />
 							<nav className="flex flex-col gap-2">
 								{navigation.map((item) => (
@@ -161,7 +161,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				)}
 			</header>
 
-			<main className="container mx-auto flex-1 w-full px-4 py-8 md:py-10 safe-area-horizontal">
+			<main className="app-shell flex-1 w-full py-8 md:py-10">
 				{title && (
 					<div className="mb-8 space-y-2">
 						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Поддержка++</p>
@@ -171,8 +171,8 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				{children}
 			</main>
 
-			<footer className="border-t border-border bg-white mt-12 no-print safe-area-horizontal safe-area-bottom">
-				<div className="container mx-auto px-4 py-8 grid gap-6 text-sm text-muted-foreground md:grid-cols-3">
+			<footer className="border-t border-border bg-white mt-12 no-print safe-area-bottom">
+				<div className="app-shell py-8 grid gap-6 text-sm text-muted-foreground md:grid-cols-3">
 					<div>
 						<p className="font-semibold text-foreground">Поддержка++</p>
 						<p className="mt-2">Цифровой помощник рассказывает, какие льготы, скидки и выплаты положены малозащищённым гражданам.</p>

@@ -322,9 +322,9 @@ export const PrintView = () => {
 
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background safe-area-top safe-area-bottom">
 			<div className="no-print sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-				<div className="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-2">
+				<div className="app-shell py-4 flex flex-wrap items-center justify-between gap-2">
 					<Button variant="ghost" size="lg" onClick={() => navigate(-1)}>
 						<ArrowLeft className="w-5 h-5 mr-2" />
 						Назад
@@ -348,7 +348,7 @@ export const PrintView = () => {
 			</div>
 
 			{ready && (
-				<div ref={contentRef} className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+				<div ref={contentRef} className="app-shell max-w-5xl py-8 space-y-8">
 					<section className="print-friendly rounded-3xl border border-border/80 bg-white p-6 shadow-sm">
 						<p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Персональная памятка</p>
 						<h1 className="text-3xl font-bold text-slate-900 mt-2">Мои льготы и лекарства</h1>
