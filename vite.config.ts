@@ -15,33 +15,74 @@ export default defineConfig(({ mode }) => ({
 		mode === "development" && componentTagger(),
 		VitePWA({
 			registerType: 'autoUpdate',
-			includeAssets: ['favicon.ico', 'robots.txt'],
+			includeAssets: [
+				'favicon.ico',
+				'robots.txt',
+				'icons/apple-touch-icon.png'
+			],
+			devOptions: {
+				enabled: true,
+				type: 'module'
+			},
 			manifest: {
 				name: 'Поддержка++ | Социальный Навигатор',
 				short_name: 'Поддержка++',
 				description: 'Социальный навигатор для льготных категорий граждан',
-				theme_color: '#3eaa7d',
-				background_color: '#fafafa',
-				display: 'standalone',
-				orientation: 'portrait',
+				lang: 'ru',
+				dir: 'ltr',
+				id: '/',
+				scope: '/',
 				start_url: '/',
-				icons: [
+				display: 'standalone',
+				display_override: ['window-controls-overlay', 'standalone'],
+				orientation: 'portrait',
+				background_color: '#fafafa',
+				theme_color: '#3eaa7d',
+				categories: ['social', 'productivity', 'health'],
+				shortcuts: [
 					{
-						src: 'placeholder.svg',
-						sizes: '192x192',
-						type: 'image/svg+xml',
-						purpose: 'any maskable'
+						name: 'Мои льготы',
+						short_name: 'Льготы',
+						description: 'Перейти к персональным льготам',
+						url: '/benefits'
 					},
 					{
-						src: 'placeholder.svg',
+						name: 'Аптечка',
+						short_name: 'Аптечка',
+						description: 'Список лекарств и скидок',
+						url: '/apteka'
+					},
+					{
+						name: 'Ассистент',
+						short_name: 'Ассистент',
+						description: 'Чат-бот Поддержка++',
+						url: '/assistant'
+					}
+				],
+				icons: [
+					{
+						src: 'icons/pwa-icon-192.png',
+						sizes: '192x192',
+						type: 'image/png',
+						purpose: 'any'
+					},
+					{
+						src: 'icons/pwa-icon-512.png',
 						sizes: '512x512',
-						type: 'image/svg+xml',
-						purpose: 'any maskable'
+						type: 'image/png',
+						purpose: 'any'
+					},
+					{
+						src: 'icons/maskable-icon-512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'maskable'
 					}
 				]
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+				cleanupOutdatedCaches: true,
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
 				runtimeCaching: [
 					{
 						urlPattern: /^https:\/\/.*\.json$/,
@@ -51,6 +92,35 @@ export default defineConfig(({ mode }) => ({
 							expiration: {
 								maxEntries: 50,
 								maxAgeSeconds: 60 * 60 * 24 // 24 hours
+							}
+						}
+					},
+					{
+						urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/.*$/i,
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'supabase-rest',
+							networkTimeoutSeconds: 5,
+							expiration: {
+								maxEntries: 60,
+								maxAgeSeconds: 60 * 5
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							}
+						}
+					},
+					{
+						urlPattern: /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\/.*$/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'supabase-storage',
+							expiration: {
+								maxEntries: 40,
+								maxAgeSeconds: 60 * 60 * 24 * 7
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
 							}
 						}
 					}
