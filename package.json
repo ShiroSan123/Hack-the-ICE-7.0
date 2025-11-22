@@ -9,7 +9,8 @@
 		"build:dev": "vite build --mode development",
 		"lint": "eslint .",
 		"preview": "vite preview",
-		"otp-server": "node otp-valhalla/index.js"
+		"otp-server": "node otp-valhalla/index.js",
+		"seed:supabase": "node scripts/seed-supabase.mjs"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.10.0",

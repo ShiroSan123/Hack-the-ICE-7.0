@@ -13,7 +13,6 @@ interface AppState {
 	setOffers: (offers: Offer[]) => void;
 	setMedicines: (medicines: Medicine[]) => void;
 	toggleHiddenBenefit: (id: string) => void;
-	setSimpleMode: (enabled: boolean) => void;
 	logout: () => void;
 }
 
@@ -39,11 +38,6 @@ export const useAppStore = create<AppState>()(
 					hiddenBenefitIds: state.hiddenBenefitIds.includes(id)
 						? state.hiddenBenefitIds.filter((benefitId) => benefitId !== id)
 						: [...state.hiddenBenefitIds, id],
-				})),
-
-			setSimpleMode: (enabled) =>
-				set((state) => ({
-					user: state.user ? { ...state.user, simpleModeEnabled: enabled } : null,
 				})),
 
 			logout: () => set({ user: null, hiddenBenefitIds: [] }),

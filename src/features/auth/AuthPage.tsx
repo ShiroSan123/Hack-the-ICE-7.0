@@ -9,36 +9,61 @@ import {
 	CardTitle,
 } from '@/shared/ui/Card';
 import { useAppStore } from '@/shared/store/useAppStore';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './AuthContext';
+import { profilesApi } from '@/shared/api/profilesApi';
 
 export const AuthPage = () => {
 	const { user: authUser, loading: authLoading } = useAuth();
 	const { setUser } = useAppStore();
 	const navigate = useNavigate();
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
+	const [syncingProfile, setSyncingProfile] = useState(false);
+	const [syncError, setSyncError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (authLoading) return;
-		if (!authUser) return;
+		if (authLoading || !authUser) return;
+		let active = true;
+		setSyncingProfile(true);
+		setSyncError(null);
 
-		const displayName = authUser.email || authUser.phone || 'Пользователь';
+		profilesApi
+			.ensureProfile({
+				authUserId: authUser.id,
+				fullName: authUser.email || authUser.phone || 'Пользователь',
+				email: authUser.email ?? null,
+				phone: authUser.phone ?? null,
+			})
+			.then((profile) => {
+				if (!active) return;
+				setUser(profile);
+				navigate('/dashboard', { replace: true });
+			})
+			.catch((error) => {
+				if (!active) return;
+				console.error('Failed to sync profile:', error);
+				setSyncError('Не удалось загрузить профиль. Попробуйте снова.');
+			})
+			.finally(() => {
+				if (active) setSyncingProfile(false);
+			});
 
-		setUser({
-			id: authUser.id,
-			phone: authUser.phone ?? '',
-			email: authUser.email,
-			region: 'xxxxxxxxx',
-			category: 'pensioner',
-			interests: [],
-			role: 'self',
-			simpleModeEnabled: true,
-			name: displayName,
-		});
-
-		navigate('/dashboard', { replace: true });
+		return () => {
+			active = false;
+		};
 	}, [authUser, authLoading, navigate, setUser]);
+
+	if (authLoading || syncingProfile) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex flex-col items-center gap-4 text-center">
+					<Loader2 className="w-10 h-10 animate-spin text-primary" />
+					<p className="text-lg font-medium">Загружаем профиль...</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -62,6 +87,10 @@ export const AuthPage = () => {
 					>
 						Войти / Зарегистрироваться
 					</Button>
+
+					{syncError && (
+						<p className="text-sm text-destructive text-center">{syncError}</p>
+					)}
 
 					<p className="text-center text-sm text-muted-foreground">
 						При первом входе будет создан новый профиль

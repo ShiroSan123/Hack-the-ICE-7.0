@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { useAppStore } from '@/shared/store/useAppStore';
 import { formatSnils } from '@/shared/lib/formatters';
 import { toast } from 'sonner';
+import { profilesApi } from '@/shared/api/profilesApi';
 import { MessageCircle, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const ProfilePage = () => {
-	const { user, setUser, setSimpleMode } = useAppStore();
+	const { user, setUser } = useAppStore();
 	const [formData, setFormData] = useState({
 		name: user?.name || '',
 		region: user?.region || 'xxxxxxxxx',
@@ -32,16 +33,29 @@ export const ProfilePage = () => {
 		}
 	}, [user]);
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const [saving, setSaving] = useState(false);
+
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!user) return;
-
-		setUser({
-			...user,
-			...formData,
-		});
-
-		toast.success('Профиль успешно обновлён');
+		setSaving(true);
+		try {
+			const updated = await profilesApi.updateProfile(user.id, {
+				fullName: formData.name,
+				region: formData.region,
+				category: formData.category,
+				snils: formData.snils,
+				role: formData.role,
+				simpleModeEnabled: formData.simpleModeEnabled,
+			});
+			setUser(updated);
+			toast.success('Профиль успешно обновлён');
+		} catch (error) {
+			console.error('Profile update error', error);
+			toast.error('Не получилось сохранить профиль');
+		} finally {
+			setSaving(false);
+		}
 	};
 
 	const handleSnilsChange = (value: string) => {
@@ -127,27 +141,26 @@ export const ProfilePage = () => {
 
 								<label className="space-y-2">
 									<span className="text-sm font-semibold">Упрощённый режим</span>
-									<div className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3">
-										<input
-											type="checkbox"
-											id="simpleMode"
-											checked={formData.simpleModeEnabled}
-											onChange={(e) => {
-												setFormData({ ...formData, simpleModeEnabled: e.target.checked });
-												setSimpleMode(e.target.checked);
-											}}
-											className="h-5 w-5 rounded border-2 border-primary"
-										/>
-										<label htmlFor="simpleMode" className="text-base">
-											Крупные элементы, озвучка и простая навигация
-										</label>
-									</div>
-								</label>
+						<div className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3">
+							<input
+								type="checkbox"
+								id="simpleMode"
+								checked={formData.simpleModeEnabled}
+								onChange={(e) => {
+									setFormData({ ...formData, simpleModeEnabled: e.target.checked });
+								}}
+								className="h-5 w-5 rounded border-2 border-primary"
+							/>
+							<label htmlFor="simpleMode" className="text-base">
+								Крупные элементы, озвучка и простая навигация
+							</label>
+						</div>
+					</label>
 							</div>
 
-							<Button type="submit" size="lg" className="w-full">
-								Сохранить изменения
-							</Button>
+						<Button type="submit" size="lg" className="w-full" disabled={saving}>
+							{saving ? 'Сохраняем...' : 'Сохранить изменения'}
+						</Button>
 						</form>
 					</CardContent>
 				</Card>
