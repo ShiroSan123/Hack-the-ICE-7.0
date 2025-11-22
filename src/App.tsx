@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { AuthPage } from "./features/auth/AuthPage";
 import { ProfilePage } from "./features/profile/ProfilePage";
 import { BenefitsListPage } from "./features/benefits/BenefitsListPage";
@@ -15,12 +16,73 @@ import { ChatBotPage } from "./features/chat/ChatBotPage";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./shared/router/ProtectedRoute";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
+import { Button } from "./shared/ui/Button";
+import { supabase } from "./shared/lib/supabaseClient";
+import { useAppStore } from "./shared/store/useAppStore";
 
 const queryClient = new QueryClient();
 
 const AuthEntryRoute = () => {
-	const { user } = useAuth();
-	return user ? <Navigate to="/dashboard" replace /> : <AuthPage />;
+	const { user, loading, profileSyncing, profileError, refreshProfile, setManualUser } = useAuth();
+	const logoutStore = useAppStore((state) => state.logout);
+
+	const handleResetAuth = async () => {
+		try {
+			await supabase.auth.signOut();
+		} catch (error) {
+			console.error('Auth reset error:', error);
+		} finally {
+			setManualUser(null);
+			logoutStore();
+		}
+	};
+
+	if (loading || profileSyncing) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background">
+				<div className="flex flex-col items-center gap-4 text-center">
+					<Loader2 className="w-10 h-10 animate-spin text-primary" />
+					<p className="text-lg font-medium">Загружаем профиль...</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (user) {
+		if (profileError) {
+			return (
+				<div className="min-h-screen flex items-center justify-center bg-background p-4">
+					<div className="max-w-md w-full rounded-3xl border border-border bg-white p-6 text-center space-y-4">
+						<h2 className="text-2xl font-semibold">Не удалось загрузить профиль</h2>
+						<p className="text-muted-foreground">{profileError}</p>
+						<div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+							<Button
+								size="lg"
+								className="flex-1"
+								onClick={() => {
+									refreshProfile().catch(() => undefined);
+								}}
+							>
+								Попробовать снова
+							</Button>
+							<Button
+								variant="outline"
+								size="lg"
+								className="flex-1"
+								onClick={handleResetAuth}
+							>
+								Сменить аккаунт
+							</Button>
+						</div>
+					</div>
+				</div>
+			);
+		}
+
+		return <Navigate to="/dashboard" replace />;
+	}
+
+	return <AuthPage />;
 };
 
 const RootRoute = () => {

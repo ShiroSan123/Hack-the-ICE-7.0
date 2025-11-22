@@ -17,9 +17,10 @@ export const BenefitsListPage = () => {
 	const [selectedType, setSelectedType] = useState('all');
 
 	useEffect(() => {
+		setLoading(true);
 		const loadBenefits = async () => {
 			try {
-				const data = await benefitsApi.getAll();
+				const data = await benefitsApi.getForProfile(user);
 				setBenefits(data);
 			} catch (error) {
 				console.error('Failed to load benefits:', error);
@@ -29,7 +30,7 @@ export const BenefitsListPage = () => {
 		};
 
 		loadBenefits();
-	}, [setBenefits]);
+	}, [setBenefits, user]);
 
 	const accessibleBenefits = useMemo(() => {
 		if (!user) return benefits;

@@ -1,6 +1,6 @@
 import { supabase } from '@/shared/lib/supabaseClient';
 import { calculateDaysUntil } from '@/shared/lib/formatters';
-import { Benefit } from '../types';
+import { Benefit, UserProfile } from '../types';
 
 type BenefitRow = {
 	id: string;
@@ -44,6 +44,18 @@ const handleError = (error: unknown) => {
 	throw new Error('Failed to load benefits');
 };
 
+const buildProfileQuery = (profile?: UserProfile | null) => {
+	let query = supabase.from('benefits').select('*').order('title');
+	if (!profile) {
+		return query;
+	}
+
+	const regionFilter = profile.region || 'all';
+	query = query.contains('target_groups', [profile.category]);
+	query = query.or(`regions.cs.{${regionFilter}},regions.cs.{all}`);
+	return query;
+};
+
 export const benefitsApi = {
 	getAll: async (): Promise<Benefit[]> => {
 		const { data, error } = await supabase
@@ -62,6 +74,13 @@ export const benefitsApi = {
 			.maybeSingle();
 		if (error) handleError(error);
 		return data ? mapRowToBenefit(data as BenefitRow) : undefined;
+	},
+
+	getForProfile: async (profile?: UserProfile | null): Promise<Benefit[]> => {
+		const query = buildProfileQuery(profile);
+		const { data, error } = await query;
+		if (error || !data) handleError(error);
+		return data.map((row) => mapRowToBenefit(row as BenefitRow));
 	},
 
 	filterByRegion: async (region: string): Promise<Benefit[]> => {

@@ -4,6 +4,7 @@ export type UserRole = 'self' | 'relative';
 
 export interface UserProfile {
 	id: string;
+	authUserId: string;
 	phone?: string;
 	email?: string;
 	region: string;

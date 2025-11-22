@@ -6,10 +6,10 @@ type Props = {
 };
 
 export const ProtectedRoute = ({ children }: Props) => {
-	const { user, loading } = useAuth();
+	const { user, loading, profileSyncing } = useAuth();
 
 	// пока не знаем, залогинен ли пользователь – показываем лоадер
-	if (loading) {
+	if (loading || profileSyncing) {
 		return <div>Загрузка...</div>; // тут можно вставить нормальный спиннер
 	}
 

@@ -88,7 +88,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 						</div>
 						<div>
 							<p className="text-xl font-bold leading-tight">Поддержка++</p>
-							<p className="text-sm text-muted-foreground">все льготы в одном окне</p>
+							<p className="text-sm text-muted-foreground">Льготы в один клик</p>
 						</div>
 					</Link>
 

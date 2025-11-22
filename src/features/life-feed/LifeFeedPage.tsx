@@ -37,10 +37,11 @@ export const LifeFeedPage = () => {
 	const { speak, speaking } = useTTS();
 
 	useEffect(() => {
+		setLoading(true);
 		const loadData = async () => {
 			try {
 				const [benefitsData, offersData, medicinesData] = await Promise.all([
-					benefitsApi.getAll(),
+					benefitsApi.getForProfile(user),
 					offersApi.getAll(),
 					medicinesApi.getAll(),
 				]);
@@ -55,7 +56,7 @@ export const LifeFeedPage = () => {
 		};
 
 		loadData();
-	}, [setBenefits, setOffers, setMedicines]);
+	}, [user, setBenefits, setOffers, setMedicines]);
 
 	const accessibleBenefits = useMemo(() => {
 		if (!user) return benefits;

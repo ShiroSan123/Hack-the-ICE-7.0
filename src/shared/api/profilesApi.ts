@@ -38,6 +38,7 @@ const DEFAULT_CATEGORY: TargetGroup = 'pensioner';
 
 const mapRowToUserProfile = (row: ProfileRow): UserProfile => ({
 	id: row.id,
+	authUserId: row.auth_user_id,
 	name: row.full_name ?? undefined,
 	email: row.email ?? undefined,
 	phone: row.phone ?? undefined,
@@ -115,5 +116,12 @@ export const profilesApi = {
 		}
 
 		return mapRowToUserProfile(data as ProfileRow);
+	},
+
+	async deleteProfile(id: string): Promise<void> {
+		const { error } = await supabase.from('profiles').delete().eq('id', id);
+		if (error) {
+			throw error;
+		}
 	},
 };

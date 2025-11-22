@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '@/shared/ui/Layout';
 import { Button } from '@/shared/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
@@ -6,14 +7,14 @@ import { useAppStore } from '@/shared/store/useAppStore';
 import { formatSnils } from '@/shared/lib/formatters';
 import { toast } from 'sonner';
 import { profilesApi } from '@/shared/api/profilesApi';
-import { MessageCircle, ShieldCheck, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { MessageCircle, ShieldCheck, LogOut, Trash2 } from 'lucide-react';
 import { supabase } from '@/shared/lib/supabaseClient';
 import { useAuth } from '@/features/auth/AuthContext';
 
 export const ProfilePage = () => {
 	const { user, setUser, logout } = useAppStore();
 	const { setManualUser } = useAuth();
+	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		name: user?.name || '',
 		region: user?.region || 'xxxxxxxxx',
@@ -37,6 +38,7 @@ export const ProfilePage = () => {
 	}, [user]);
 
 	const [saving, setSaving] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -74,6 +76,28 @@ export const ProfilePage = () => {
 		} finally {
 			setManualUser(null);
 			logout();
+			navigate('/auth');
+		}
+	};
+
+	const handleDeleteProfile = async () => {
+		if (!user) return;
+		if (!window.confirm('Удалить профиль и выйти из аккаунта?')) {
+			return;
+		}
+		setDeleting(true);
+		try {
+			await profilesApi.deleteProfile(user.id);
+			await supabase.auth.signOut();
+			setManualUser(null);
+			logout();
+			navigate('/auth', { replace: true });
+			toast.success('Профиль удалён');
+		} catch (error) {
+			console.error('Profile delete error', error);
+			toast.error('Не удалось удалить профиль');
+		} finally {
+			setDeleting(false);
 		}
 	};
 
@@ -205,7 +229,7 @@ export const ProfilePage = () => {
 						</CardContent>
 					</Card>
 
-					<Card className="rounded-3xl">
+					<Card className="rounded-3xl space-y-4">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<LogOut className="w-5 h-5" />
@@ -216,6 +240,18 @@ export const ProfilePage = () => {
 						<CardContent>
 							<Button variant="outline" size="lg" className="w-full" onClick={handleLogout}>
 								Выйти из профиля
+							</Button>
+						</CardContent>
+						<CardContent>
+							<Button
+								variant="destructive"
+								size="lg"
+								className="w-full"
+								onClick={handleDeleteProfile}
+								disabled={deleting}
+							>
+								<Trash2 className="w-4 h-4" />
+								{deleting ? 'Удаляем...' : 'Удалить профиль'}
 							</Button>
 						</CardContent>
 					</Card>
