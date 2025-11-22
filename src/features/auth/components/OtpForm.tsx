@@ -22,7 +22,10 @@ export function OtpForm({ onSuccess }: Props) {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [requestId, setRequestId] = useState<string | null>(null);
-	const { setManualUser } = useAuth();
+
+	// ДОБАВЛЕНО: берём refreshProfile из AuthContext
+	const { setManualUser, refreshProfile } = useAuth();
+
 	const mockFillTimeouts = useRef<number[]>([]);
 
 	const clearMockFill = () => {
@@ -87,10 +90,22 @@ export function OtpForm({ onSuccess }: Props) {
 
 			if (channel === 'sms') {
 				const smsResult = result as SmsVerifyResponse;
+
+				// важно: бэкенд уже сделал ensureSupabaseUser и вернул uuid
+				const supabaseUserId = smsResult?.supabaseUserId;
+
+				if (!supabaseUserId) {
+					throw new Error('Не удалось создать или найти аккаунт по этому номеру');
+				}
+
+				// 1) Сохраняем manualUser с НАСТОЯЩИМ uuid (не sms:+...)
 				setManualUser({
-					id: smsResult?.supabaseUserId ?? `sms:${recipient}`,
-					phone: recipient,
+					id: supabaseUserId,
+					phone: smsResult.phone ?? recipient,
 				});
+
+				// 2) Синхронизируем профиль через profilesApi.ensureProfile
+				await refreshProfile();
 			}
 
 			if (onSuccess) onSuccess();

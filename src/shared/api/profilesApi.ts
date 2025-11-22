@@ -1,6 +1,6 @@
-import { supabase } from '@/shared/lib/supabaseClient';
 import { TargetGroup } from '@/shared/types/benefit';
 import { UserProfile, UserRole } from '@/shared/types/user';
+import { OTP_API_URL } from './otpClient';
 
 interface ProfileRow {
 	id: string;
@@ -25,16 +25,21 @@ export type UpsertProfilePayload = {
 
 export type UpdateProfilePayload = {
 	fullName?: string | null;
+	email?: string | null;
 	region?: string;
 	category?: TargetGroup;
 	snils?: string | null;
 	role?: UserRole;
 	interests?: string[];
 	simpleModeEnabled?: boolean;
+	phone?: string | null;
 };
 
 const DEFAULT_REGION = 'xxxxxxxxx';
 const DEFAULT_CATEGORY: TargetGroup = 'pensioner';
+
+const UUID_REGEX =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const mapRowToUserProfile = (row: ProfileRow): UserProfile => ({
 	id: row.id,
@@ -53,75 +58,77 @@ const mapRowToUserProfile = (row: ProfileRow): UserProfile => ({
 export const profilesApi = {
 	async ensureProfile(payload: UpsertProfilePayload): Promise<UserProfile> {
 		const { authUserId, fullName, email, phone } = payload;
-		const { data, error } = await supabase
-			.from('profiles')
-			.select('*')
-			.eq('auth_user_id', authUserId)
-			.maybeSingle();
 
-		if (error) {
-			throw error;
+		// защита от любых non-UUID
+		if (!UUID_REGEX.test(authUserId)) {
+			throw new Error(`ensureProfile: authUserId is not a valid UUID: ${authUserId}`);
 		}
 
-		if (data) {
-			return mapRowToUserProfile(data as ProfileRow);
-		}
+		const { profile } = await requestProfileApi<{ profile: ProfileRow }>(
+			'/profiles/ensure',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					authUserId,
+					fullName,
+					email,
+					phone,
+				}),
+			}
+		);
 
-		const insertPayload = {
-			auth_user_id: authUserId,
-			full_name: fullName ?? 'Пользователь',
-			email: email ?? null,
-			phone: phone ?? null,
-			region: DEFAULT_REGION,
-			category: DEFAULT_CATEGORY,
-			role: 'self' as UserRole,
-			interests: [],
-			simple_mode_enabled: true,
-		};
-
-		const { data: created, error: insertError } = await supabase
-			.from('profiles')
-			.insert(insertPayload)
-			.select('*')
-			.single();
-
-		if (insertError || !created) {
-			throw insertError;
-		}
-
-		return mapRowToUserProfile(created as ProfileRow);
+		return mapRowToUserProfile(profile);
 	},
 
-	async updateProfile(id: string, payload: UpdateProfilePayload): Promise<UserProfile> {
-		const updatePayload: Record<string, unknown> = {};
-
-		if ('fullName' in payload) updatePayload.full_name = payload.fullName ?? null;
-		if ('region' in payload) updatePayload.region = payload.region;
-		if ('category' in payload) updatePayload.category = payload.category;
-		if ('snils' in payload) updatePayload.snils = payload.snils ?? null;
-		if ('role' in payload) updatePayload.role = payload.role;
-		if ('interests' in payload) updatePayload.interests = payload.interests;
-		if ('simpleModeEnabled' in payload)
-			updatePayload.simple_mode_enabled = payload.simpleModeEnabled;
-
-		const { data, error } = await supabase
-			.from('profiles')
-			.update(updatePayload)
-			.eq('id', id)
-			.select('*')
-			.single();
-
-		if (error || !data) {
-			throw error;
+	async updateProfile(
+		authUserId: string,
+		payload: UpdateProfilePayload
+	): Promise<UserProfile> {
+		if (!UUID_REGEX.test(authUserId)) {
+			throw new Error(`updateProfile: authUserId is not valid UUID: ${authUserId}`);
 		}
 
-		return mapRowToUserProfile(data as ProfileRow);
+		const { profile } = await requestProfileApi<{ profile: ProfileRow }>(
+			`/profiles/${authUserId}`,
+			{
+				method: 'PUT',
+				body: JSON.stringify(payload),
+			}
+		);
+
+		return mapRowToUserProfile(profile);
 	},
 
-	async deleteProfile(id: string): Promise<void> {
-		const { error } = await supabase.from('profiles').delete().eq('id', id);
-		if (error) {
-			throw error;
+	async deleteProfile(authUserId: string): Promise<void> {
+		if (!UUID_REGEX.test(authUserId)) {
+			throw new Error(`deleteProfile: authUserId is not valid UUID: ${authUserId}`);
 		}
+
+		await requestProfileApi(`/profiles/${authUserId}`, {
+			method: 'DELETE',
+		});
 	},
 };
+
+async function requestProfileApi<T>(path: string, init: RequestInit): Promise<T> {
+	const response = await fetch(`${OTP_API_URL}${path}`, {
+		...init,
+		headers: {
+			'Content-Type': 'application/json',
+			...(init.headers || {}),
+		},
+	});
+
+	const text = await response.text();
+	const payload = text ? (JSON.parse(text) as unknown) : null;
+
+	if (!response.ok) {
+		const message =
+			payload && typeof payload === 'object' && 'message' in payload
+				? (payload as { message?: string }).message
+				: 'Не удалось выполнить запрос профиля';
+		throw new Error(message || 'Не удалось выполнить запрос профиля');
+	}
+
+	return payload as T;
+}

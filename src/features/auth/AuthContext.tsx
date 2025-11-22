@@ -16,6 +16,7 @@ type AuthUser = {
 	id: string;
 	email?: string;
 	phone?: string;
+	isPseudo?: boolean;
 };
 
 type AuthContextValue = {
@@ -58,21 +59,29 @@ const AuthContext = createContext<AuthContextValue>({
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const { user: profile, setUser } = useAppStore();
 	const [sessionUser, setSessionUser] = useState<AuthUser | null>(null);
+
 	const [manualUser, setManualUserState] = useState<AuthUser | null>(() => {
 		if (typeof window === 'undefined') return null;
 		const stored = window.localStorage.getItem('support-plus-manual-user');
 		if (!stored) return null;
 		try {
-			return JSON.parse(stored) as AuthUser;
+			const parsed = JSON.parse(stored) as AuthUser;
+			// при реинициализации помечаем non-UUID как pseudo
+			if (!UUID_REGEX.test(parsed.id)) {
+				parsed.isPseudo = true;
+			}
+			return parsed;
 		} catch (_e) {
 			return null;
 		}
 	});
+
 	const [loading, setLoading] = useState(true);
 	const [profileSyncing, setProfileSyncing] = useState(false);
 	const [profileError, setProfileError] = useState<string | null>(null);
 	const profileSyncUserRef = useRef<string | null>(null);
-	const authUser = manualUser ?? sessionUser;
+
+	const authUser = sessionUser ?? manualUser;
 	const profileAuthUserId = profile?.authUserId;
 
 	useEffect(() => {
@@ -80,14 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 		const init = async () => {
 			try {
-				// 1. пробуем получить юзера
 				const { data, error } = await supabase.auth.getUser();
 
 				if (!isMounted) return;
 
-				// 2. если сессии нет — это нормальный кейс, просто user остаётся null
 				if (error) {
-					// Supabase кидает AuthSessionMissingError, когда вообще нет сессии
 					if (error.name !== 'AuthSessionMissingError') {
 						console.error('getUser unexpected error:', error);
 					}
@@ -96,9 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 				if (data.user) {
 					setSessionUser({
-						id: data.user.id,
+						id: data.user.id, // всегда uuid от Supabase
 						email: data.user.email ?? undefined,
-						phone: data.user.phone ?? data.user.user_metadata?.phone ?? undefined,
+						phone:
+							data.user.phone ?? data.user.user_metadata?.phone ?? undefined,
+						isPseudo: false,
 					});
 				}
 			} finally {
@@ -117,7 +125,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				setSessionUser({
 					id: session.user.id,
 					email: session.user.email ?? undefined,
-					phone: session.user.phone ?? session.user.user_metadata?.phone ?? undefined,
+					phone:
+						session.user.phone ??
+						session.user.user_metadata?.phone ??
+						undefined,
+					isPseudo: false,
 				});
 			} else {
 				setSessionUser(null);
@@ -152,12 +164,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [manualUser]);
 
 	const handleSetManualUser = (value: AuthUser | null) => {
-		setManualUserState(value);
+		if (!value) {
+			setManualUserState(null);
+			return;
+		}
+
+		const normalized: AuthUser = {
+			...value,
+			isPseudo: !UUID_REGEX.test(value.id),
+		};
+
+		if (sessionUser) {
+			console.warn(
+				'setManualUser called while sessionUser exists – ignoring manual id override'
+			);
+		}
+
+		setManualUserState(normalized);
 	};
 
 	const ensureProfileForUser = useCallback(
 		async (current: AuthUser) => {
-			if (!UUID_REGEX.test(current.id)) {
+			if (current.isPseudo || !UUID_REGEX.test(current.id)) {
 				return buildFallbackProfile(current);
 			}
 
