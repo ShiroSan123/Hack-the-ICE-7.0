@@ -1,7 +1,6 @@
+import { requestOtpCode, verifyOtpCode, type OtpVerifyResponse } from '@/shared/api/otpClient';
+import { normalizePhoneToE164, isValidPhone } from '@/shared/lib/phone';
 import { supabase } from '@/shared/lib/supabaseClient';
-
-const OTP_API_URL =
-	import.meta.env.VITE_OTP_API_URL || 'https://otp-valhalla.vercel.app';
 
 export type VerificationChannel = 'sms' | 'email';
 
@@ -21,69 +20,8 @@ export type SendVerificationResponse = {
 	mockCode?: string | null;
 };
 
-export type SmsVerifyResponse = {
-	success: boolean;
-	phone: string;
-	mock?: boolean;
-	supabaseUserId?: string | null;
-	supabaseUserCreated?: boolean;
-};
-
-export function normalizePhoneToE164(raw: string): string {
-	const trimmed = raw.trim();
-	if (!trimmed) return '';
-	if (trimmed.startsWith('+')) return trimmed;
-
-	const digits = trimmed.replace(/\D/g, '');
-	if (!digits) return '';
-
-	if (digits.length === 11 && digits.startsWith('8')) {
-		return `+7${digits.slice(1)}`;
-	}
-
-	if (digits.length === 10 && digits.startsWith('9')) {
-		return `+7${digits}`;
-	}
-
-	if (digits.length === 11 && digits.startsWith('7')) {
-		return `+${digits}`;
-	}
-
-	return `+${digits}`;
-}
-
-export function isValidPhone(raw: string): boolean {
-	const normalized = normalizePhoneToE164(raw);
-	return /^\+\d{10,15}$/.test(normalized);
-}
-
-type OtpRequestResponse = {
-	requestId: string;
-	mock?: boolean;
-	mockCode?: string;
-	expiresIn?: number;
-};
-
-type OtpVerifyResponse = SmsVerifyResponse;
-
-async function postToOtpApi<T>(path: string, body: Record<string, unknown>) {
-	const response = await fetch(`${OTP_API_URL}${path}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(body),
-	});
-
-	if (!response.ok) {
-		const payload = await response.json().catch(() => ({}));
-		throw new Error(
-			payload.message || 'Не удалось выполнить запрос для отправки кода'
-		);
-	}
-
-	return response.json() as Promise<T>;
-}
+export type SmsVerifyResponse = OtpVerifyResponse;
+export { normalizePhoneToE164, isValidPhone };
 
 export async function sendVerificationCode({
 	recipient,
@@ -115,12 +53,7 @@ export async function sendVerificationCode({
 		throw new Error('Проверь номер телефона');
 	}
 
-	const response = await postToOtpApi<OtpRequestResponse>(
-		'/otp/request',
-		{
-			phone,
-		}
-	);
+	const response = await requestOtpCode(phone);
 
 	return {
 		requestId: response.requestId,
@@ -154,8 +87,5 @@ export async function verifyCode({
 		throw new Error('Отсутствует идентификатор запроса. Запросите код снова.');
 	}
 
-	return postToOtpApi<OtpVerifyResponse>('/otp/verify', {
-		requestId,
-		code,
-	});
+	return verifyOtpCode(requestId, code);
 }

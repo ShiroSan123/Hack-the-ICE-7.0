@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Button } from '@/shared/ui/Button';
 import { useAppStore } from '@/shared/store/useAppStore';
+import { requestOtpCode, type OtpRequestResponse } from '@/shared/api/otpClient';
+import { normalizePhoneToE164, isValidPhone } from '@/shared/lib/phone';
+import { useAuth } from '@/features/auth/AuthContext';
 import {
 	Printer,
 	ArrowLeft,
@@ -12,22 +16,250 @@ import {
 	Pill,
 	ShieldCheck,
 	CheckCircle2,
+	QrCode,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatCurrency } from '@/shared/lib/formatters';
+import type { Benefit } from '@/shared/types';
+
+type PrintQrResult = OtpRequestResponse & {
+	normalizedPhone: string;
+	requestedAt: string;
+	expiresAt: string | null;
+};
+
+type ParsedQrPayload = {
+	requestId?: string;
+	phone?: string;
+	provider?: string;
+	brand?: string;
+	generatedAt?: string;
+};
+
+const formatDetailedDate = (value: string | null) => {
+	if (!value) return '—';
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) {
+		return '—';
+	}
+
+	return date.toLocaleString('ru-RU', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+	});
+};
 
 export const PrintView = () => {
 	const { benefits, medicines, user } = useAppStore();
+	const { user: authUser } = useAuth();
 	const navigate = useNavigate();
 	const [ready, setReady] = useState(false);
 	const [downloading, setDownloading] = useState(false);
+	const autopilotSourcePhone = user?.phone ?? authUser?.phone ?? '';
+	const [qrPhone, setQrPhone] = useState(() => {
+		const normalized = normalizePhoneToE164(autopilotSourcePhone);
+		return normalized || autopilotSourcePhone || '';
+	});
+	const [qrResult, setQrResult] = useState<PrintQrResult | null>(null);
+	const [qrLoading, setQrLoading] = useState(false);
+	const [qrError, setQrError] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
+	const autoRequestedRef = useRef<string | null>(null);
+	const normalizedAutoPhone = useMemo(() => {
+		if (!autopilotSourcePhone) return null;
+		const normalized = normalizePhoneToE164(autopilotSourcePhone);
+		return isValidPhone(normalized) ? normalized : null;
+	}, [autopilotSourcePhone]);
+	const printDate = useMemo(() => {
+		return new Date().toLocaleString('ru-RU', {
+			day: '2-digit',
+			month: 'long',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	}, []);
+	const userBenefits = useMemo(() => {
+		if (!user) return benefits;
+		return benefits.filter((benefit) => {
+			const matchesRegion =
+				benefit.regions.includes(user.region) || benefit.regions.includes('all');
+			const matchesCategory = benefit.targetGroups.includes(user.category);
+			return matchesRegion && matchesCategory;
+		});
+	}, [benefits, user]);
+	const soonExpiring = useMemo(() => {
+		return userBenefits
+			.filter((benefit) => typeof benefit.expiresIn === 'number')
+			.reduce<Benefit | null>((closest, benefit) => {
+				if (!closest) return benefit;
+				const current = benefit.expiresIn ?? Number.MAX_SAFE_INTEGER;
+				const best = closest.expiresIn ?? Number.MAX_SAFE_INTEGER;
+				return current < best ? benefit : closest;
+			}, null);
+	}, [userBenefits]);
+	const totalBenefitSavings = useMemo(() => {
+		return userBenefits.reduce((sum, benefit) => sum + (benefit.savingsPerMonth ?? 0), 0);
+	}, [userBenefits]);
+	const totalMedicineCost = useMemo(() => {
+		return medicines.reduce((sum, medicine) => {
+			const cost =
+				typeof medicine.discountedPrice === 'number'
+					? medicine.discountedPrice
+					: medicine.monthlyPrice;
+			return sum + (cost ?? 0);
+		}, 0);
+	}, [medicines]);
 
 	useEffect(() => {
 		setReady(true);
 	}, []);
 
 	const handlePrint = () => window.print();
+
+	const parsedQrPayload = useMemo<ParsedQrPayload | null>(() => {
+		if (!qrResult?.qr?.payload) return null;
+		try {
+			const data = JSON.parse(qrResult.qr.payload);
+			return typeof data === 'object' && data !== null ? (data as ParsedQrPayload) : null;
+		} catch {
+			return null;
+		}
+	}, [qrResult]);
+
+	const qrPayloadText = useMemo(() => {
+		if (!qrResult?.qr?.payload) return '';
+		return parsedQrPayload
+			? JSON.stringify(parsedQrPayload, null, 2)
+			: qrResult.qr.payload;
+	}, [parsedQrPayload, qrResult]);
+
+	const qrGeneratedAtLabel = formatDetailedDate(
+		parsedQrPayload?.generatedAt ?? qrResult?.requestedAt ?? null
+	);
+	const qrExpiresLabel = formatDetailedDate(qrResult?.expiresAt ?? null);
+	const qrProviderLabel = parsedQrPayload?.provider ?? (qrResult?.mock ? 'mock' : '—');
+	const qrBrandLabel = parsedQrPayload?.brand ?? '—';
+
+	const buildReportPayload = useCallback(() => {
+		const benefitsReport = userBenefits.map((benefit) => ({
+			id: benefit.id,
+			title: benefit.title,
+			description: benefit.description,
+			type: benefit.type,
+			targetGroups: benefit.targetGroups,
+			regions: benefit.regions,
+			validFrom: benefit.validFrom,
+			validTo: benefit.validTo,
+			requirements: benefit.requirements,
+			documents: benefit.documents,
+			steps: benefit.steps,
+			partner: benefit.partner,
+			savingsPerMonth: benefit.savingsPerMonth,
+			expiresIn: benefit.expiresIn ?? null,
+		}));
+
+		const medicinesReport = medicines.map((medicine) => ({
+			id: medicine.id,
+			name: medicine.name,
+			dosage: medicine.dosage,
+			frequency: medicine.frequency,
+			prescribedBy: medicine.prescribedBy,
+			prescribedDate: medicine.prescribedDate,
+			refillDate: medicine.refillDate,
+			monthlyPrice: medicine.monthlyPrice,
+			discountedPrice: medicine.discountedPrice,
+		}));
+
+		return {
+			generatedAt: new Date().toISOString(),
+			printDateLabel: printDate,
+			profile: {
+				id: user?.id ?? null,
+				name: user?.name ?? 'Пользователь',
+				region: user?.region ?? '—',
+				category: user?.category ?? '—',
+			},
+			stats: {
+				benefitsCount: userBenefits.length,
+				totalBenefitSavings,
+				medicinesCount: medicines.length,
+				totalMedicineCost,
+			},
+			soonExpiring: soonExpiring
+				? {
+					id: soonExpiring.id,
+					title: soonExpiring.title,
+					expiresIn: soonExpiring.expiresIn ?? null,
+					validTo: soonExpiring.validTo ?? null,
+				}
+				: null,
+			benefits: benefitsReport,
+			medicines: medicinesReport,
+		};
+	}, [
+		user,
+		userBenefits,
+		medicines,
+		totalBenefitSavings,
+		totalMedicineCost,
+		soonExpiring,
+		printDate,
+	]);
+
+	const generateQr = useCallback(async (normalized: string) => {
+		setQrError(null);
+		setQrLoading(true);
+		try {
+			const reportPayload = buildReportPayload();
+			const data = await requestOtpCode(normalized, { report: reportPayload });
+			if (!data.qr?.dataUrl) {
+				throw new Error('Сервер не вернул QR-код. Повторите попытку.');
+			}
+
+			setQrResult({
+				...data,
+				normalizedPhone: normalized,
+				requestedAt: new Date().toISOString(),
+				expiresAt:
+					typeof data.expiresIn === 'number'
+						? new Date(Date.now() + data.expiresIn * 1000).toISOString()
+						: null,
+			});
+			} catch (error) {
+				console.error('QR request error:', error);
+				const message =
+					error instanceof Error ? error.message : 'Не удалось создать QR-код';
+				setQrError(message);
+			} finally {
+				setQrLoading(false);
+			}
+		}, [buildReportPayload]);
+
+	const handleGenerateQr = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const normalized = normalizePhoneToE164(qrPhone);
+		if (!isValidPhone(normalized)) {
+			setQrError('Введите номер телефона в формате +79991234567');
+			return;
+		}
+
+		await generateQr(normalized);
+	};
+
+	useEffect(() => {
+		if (!normalizedAutoPhone) return;
+		if (qrLoading) return;
+		if (autoRequestedRef.current === normalizedAutoPhone) return;
+
+		autoRequestedRef.current = normalizedAutoPhone;
+		setQrPhone((prev) => (prev ? prev : normalizedAutoPhone));
+		void generateQr(normalizedAutoPhone);
+	}, [normalizedAutoPhone, qrLoading, generateQr]);
 
 	const handleDownloadPdf = async () => {
 		if (!contentRef.current) return;
@@ -64,30 +296,6 @@ export const PrintView = () => {
 		}
 	};
 
-	const userBenefits = user
-		? benefits.filter(
-			(b) =>
-				b.targetGroups.includes(user.category) &&
-				(b.regions.includes(user.region) || b.regions.includes('all'))
-			)
-		: benefits;
-
-	const totalBenefitSavings = userBenefits.reduce(
-		(sum, benefit) => sum + (benefit.savingsPerMonth ?? 0),
-		0
-	);
-
-	const totalMedicineCost = medicines.reduce(
-		(sum, med) => sum + (med.discountedPrice ?? med.monthlyPrice),
-		0
-	);
-
-	const soonExpiring = userBenefits
-		.filter((benefit) => typeof benefit.expiresIn === 'number')
-		.sort((a, b) => (a.expiresIn ?? Infinity) - (b.expiresIn ?? Infinity))[0];
-
-	const printDate = formatDate(new Date().toISOString());
-
 	const summaryCards = [
 		{
 			label: 'Доступных льгот',
@@ -111,6 +319,7 @@ export const PrintView = () => {
 			accent: 'bg-accent/10 text-accent',
 		},
 	];
+
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -152,6 +361,111 @@ export const PrintView = () => {
 						{soonExpiring && (
 							<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
 								<strong>Важно:</strong> льгота «{soonExpiring.title}» истекает через {soonExpiring.expiresIn} дней. Проверьте документы.
+							</div>
+						)}
+					</section>
+
+					<section className="print-friendly rounded-3xl border border-primary/30 bg-white p-6 shadow-sm">
+						<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+							<div>
+								<p className="text-xs uppercase tracking-[0.3em] text-primary/80">QR для печати</p>
+								<h2 className="text-2xl font-bold text-slate-900 mt-1">Сформируйте пропуск</h2>
+								<p className="text-muted-foreground">Запрос уходит в POST /otp/request, а на странице появляется QR для печати и requestId.</p>
+							</div>
+							<div className="no-print flex items-center gap-2 text-sm text-muted-foreground">
+								<QrCode className="w-5 h-5 text-primary" />
+								<span>Сканируется камерами и валидаторами</span>
+							</div>
+						</div>
+						<form onSubmit={handleGenerateQr} className="no-print mt-6 grid gap-4 md:grid-cols-[minmax(0,360px)_auto]">
+							<label className="space-y-2">
+								<span className="text-sm font-medium text-muted-foreground">Номер телефона (формат E.164)</span>
+								<input
+									className="w-full rounded-2xl border border-border/70 bg-background px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+									type="tel"
+									placeholder="+79991234567"
+									value={qrPhone}
+									onChange={(event) => setQrPhone(event.target.value)}
+								/>
+							</label>
+							<div className="flex items-end gap-2">
+								<Button type="submit" size="lg" disabled={qrLoading || !qrPhone}>
+									{qrLoading ? 'Создаём...' : 'Получить QR'}
+								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									size="lg"
+									onClick={handlePrint}
+									disabled={!qrResult?.qr?.dataUrl}
+								>
+									<Printer className="w-5 h-5 mr-2" />
+									Печать QR
+								</Button>
+							</div>
+						</form>
+						{qrError && (
+							<div className="no-print mt-4 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+								{qrError}
+							</div>
+						)}
+
+						{qrResult?.qr?.dataUrl && (
+							<div className="mt-6 grid gap-6 lg:grid-cols-[260px,minmax(0,1fr)]">
+								<div className="rounded-3xl border border-border/70 bg-white p-4 text-center">
+									<img
+										src={qrResult.qr.dataUrl}
+										alt={`QR-код для ${qrResult.normalizedPhone}`}
+										className="w-full rounded-2xl border border-border object-contain"
+									/>
+									<p className="mt-3 text-xs text-muted-foreground">Вставьте код в макет или распечатайте прямо отсюда.</p>
+								</div>
+								<div className="space-y-4">
+									<div className="grid gap-3 sm:grid-cols-2">
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Телефон</p>
+											<p className="text-lg font-semibold">{qrResult.normalizedPhone}</p>
+										</div>
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Request ID</p>
+											<p className="font-mono text-sm break-all">{qrResult.requestId}</p>
+										</div>
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Сгенерирован</p>
+											<p className="text-sm font-semibold">{qrGeneratedAtLabel}</p>
+										</div>
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Действителен до</p>
+											<p className="text-sm font-semibold">{qrExpiresLabel}</p>
+										</div>
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Провайдер</p>
+											<p className="text-sm font-semibold">{qrProviderLabel}</p>
+										</div>
+										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Бренд</p>
+											<p className="text-sm font-semibold">{qrBrandLabel}</p>
+										</div>
+									</div>
+
+									{qrPayloadText && (
+										<div>
+											<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Payload</p>
+											<pre className="mt-2 max-h-60 overflow-auto rounded-2xl border border-border/70 bg-slate-50 p-4 text-xs font-mono leading-5 text-slate-700">
+												{qrPayloadText}
+											</pre>
+										</div>
+									)}
+
+									{qrResult.mock && (
+										<div className="rounded-2xl border border-dashed border-amber-400 bg-amber-50/70 p-4 text-sm text-amber-900">
+											<p className="font-semibold">Тестовый режим (mock)</p>
+											<p>SMS не отправляются; QR подходит только для демонстрации. {qrResult.mockCode && (
+												<span>Код: <span className="font-mono">{qrResult.mockCode}</span></span>
+											)}</p>
+										</div>
+									)}
+								</div>
 							</div>
 						)}
 					</section>

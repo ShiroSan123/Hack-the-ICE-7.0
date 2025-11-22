@@ -8,8 +8,23 @@ alter table public.profiles
 	add column if not exists interests text[] default '{}',
 	add column if not exists simple_mode_enabled boolean default true;
 
-alter table public.profiles
-	add constraint profiles_auth_user_id_unique unique (auth_user_id);
+do $$
+begin
+	if not exists (
+		select 1
+		from pg_constraint
+		where conname = 'profiles_auth_user_id_unique'
+			and conrelid = 'public.profiles'::regclass
+	) then
+		begin
+			alter table public.profiles
+				add constraint profiles_auth_user_id_unique unique (auth_user_id);
+		exception
+			when duplicate_table or duplicate_object then
+				null;
+		end;
+	end if;
+end $$;
 
 -- Benefits catalog
 create table if not exists public.benefits (
