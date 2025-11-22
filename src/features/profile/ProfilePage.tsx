@@ -6,11 +6,14 @@ import { useAppStore } from '@/shared/store/useAppStore';
 import { formatSnils } from '@/shared/lib/formatters';
 import { toast } from 'sonner';
 import { profilesApi } from '@/shared/api/profilesApi';
-import { MessageCircle, ShieldCheck } from 'lucide-react';
+import { MessageCircle, ShieldCheck, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/shared/lib/supabaseClient';
+import { useAuth } from '@/features/auth/AuthContext';
 
 export const ProfilePage = () => {
-	const { user, setUser } = useAppStore();
+	const { user, setUser, logout } = useAppStore();
+	const { setManualUser } = useAuth();
 	const [formData, setFormData] = useState({
 		name: user?.name || '',
 		region: user?.region || 'xxxxxxxxx',
@@ -61,6 +64,17 @@ export const ProfilePage = () => {
 	const handleSnilsChange = (value: string) => {
 		const cleaned = value.replace(/\D/g, '').slice(0, 11);
 		setFormData({ ...formData, snils: cleaned });
+	};
+
+	const handleLogout = async () => {
+		try {
+			await supabase.auth.signOut();
+		} catch (error) {
+			console.error('signOut error:', error);
+		} finally {
+			setManualUser(null);
+			logout();
+		}
 	};
 
 	return (
@@ -188,6 +202,21 @@ export const ProfilePage = () => {
 								<ShieldCheck className="w-4 h-4 text-primary" />
 								Персональные данные хранятся локально и используются только для рекомендаций.
 							</div>
+						</CardContent>
+					</Card>
+
+					<Card className="rounded-3xl">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<LogOut className="w-5 h-5" />
+								Аккаунт
+							</CardTitle>
+							<CardDescription>Выйдите из аккаунта и очистите локальные данные.</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Button variant="outline" size="lg" className="w-full" onClick={handleLogout}>
+								Выйти из профиля
+							</Button>
 						</CardContent>
 					</Card>
 				</div>
