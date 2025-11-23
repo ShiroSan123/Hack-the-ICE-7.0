@@ -82,56 +82,81 @@ export const Layout = ({ children, title }: LayoutProps) => {
 					</div>
 				</div>
 
-				<div className="app-shell flex items-center gap-4">
-					<Link to="/dashboard" className="flex items-center gap-3">
-						<img
-							src="/logo-ruka.svg"
-							alt="Рука помощи"
-							className="w-12 h-12 rounded-2xl border border-primary/20 bg-white shadow-sm"
-							loading="lazy"
-						/>
-						<div>
-							<p className="text-xl font-bold leading-tight">Рука помощи</p>
-							<p className="text-sm text-muted-foreground">Льготы в один клик</p>
+				<div className="app-shell flex flex-col gap-3">
+					<div className="flex flex-wrap items-center gap-4 md:flex-nowrap">
+						<Link to="/dashboard" className="flex w-full items-center gap-3 md:w-auto">
+							<img
+								src="/logo-ruka.svg"
+								alt="Рука помощи"
+								className="w-12 h-12 rounded-2xl border border-primary/20 bg-white shadow-sm"
+								loading="lazy"
+							/>
+							<div className="min-w-0">
+								<div className="text-lg font-bold leading-tight sm:text-xl">
+									<span className="block">Рука</span>
+									<span className="block">помощи</span>
+								</div>
+								<p className="text-xs text-muted-foreground sm:text-sm">Льготы в один клик</p>
+							</div>
+						</Link>
+
+						<nav className="hidden lg:flex items-center gap-2 flex-1">
+							{navigation.map((item) => {
+								const active = isLinkActive(item.match);
+								return (
+									<Link
+										key={item.to}
+										to={item.to}
+										aria-current={active ? 'page' : undefined}
+										className={cn(
+											'flex items-center gap-2 rounded-2xl px-4 py-2 text-base font-semibold transition-all',
+											active
+												? 'bg-primary/10 text-primary shadow-sm'
+												: 'text-muted-foreground hover:text-primary hover:bg-primary/5'
+										)}
+									>
+										<item.icon className="w-4 h-4" />
+										{item.name}
+									</Link>
+								);
+							})}
+						</nav>
+
+						<div className="hidden md:flex items-center gap-3">
+							<ModeSwitch />
 						</div>
-					</Link>
 
-					<nav className="hidden lg:flex items-center gap-2 flex-1">
-						{navigation.map((item) => {
-							const active = isLinkActive(item.match);
-							return (
-								<Link
-									key={item.to}
-									to={item.to}
-									className={cn(
-										'flex items-center gap-2 rounded-2xl px-4 py-2 text-base font-semibold transition-all',
-										active
-											? 'bg-primary/10 text-primary shadow-sm'
-											: 'text-muted-foreground hover:text-primary hover:bg-primary/5'
-									)}
-								>
-									<item.icon className="w-4 h-4" />
-									{item.name}
-								</Link>
-							);
-						})}
-					</nav>
-
-					<div className="hidden md:flex items-center gap-3">
-						<ModeSwitch />
-						{user && (
-							<Button variant="outline" size="sm" onClick={handleLogout}>
-								Выйти
-							</Button>
-						)}
 					</div>
 
-					<div className="ml-auto flex items-center gap-2 md:hidden">
+					<div className="flex w-full items-center gap-2 lg:hidden">
+						<nav className="flex flex-1 gap-2 overflow-x-auto pb-2" aria-label="Основная навигация">
+							{navigation.map((item) => {
+								const active = isLinkActive(item.match);
+								return (
+									<Link
+										key={item.to}
+										to={item.to}
+										aria-current={active ? 'page' : undefined}
+										className={cn(
+											'flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors',
+											active
+												? 'bg-primary/10 text-primary border-primary/30 shadow-sm'
+												: 'bg-white text-foreground border-border hover:border-primary/40 hover:text-primary'
+										)}
+									>
+										<item.icon className="h-4 w-4 shrink-0" />
+										{item.name}
+									</Link>
+								);
+							})}
+						</nav>
+
 						<Button
 							variant="ghost"
 							size="icon"
+							className="shrink-0"
 							onClick={() => setMenuOpen((prev) => !prev)}
-							aria-label="Открыть меню"
+							aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
 						>
 							{menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
 						</Button>
@@ -141,20 +166,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				{menuOpen && (
 					<div className="border-t border-border/80 bg-white md:hidden">
 						<div className="app-shell py-4 space-y-4">
-							<ModeSwitch className="w-full" />
-							<nav className="flex flex-col gap-2">
-								{navigation.map((item) => (
-									<Link
-										key={item.to}
-										to={item.to}
-										onClick={() => setMenuOpen(false)}
-										className="flex items-center gap-3 rounded-2xl px-4 py-3 text-lg font-semibold text-foreground hover:bg-primary/5"
-									>
-										<item.icon className="w-5 h-5" />
-										{item.name}
-									</Link>
-								))}
-							</nav>
+							<ModeSwitch className="w-full justify-center" />
 							{user && (
 								<Button variant="outline" size="lg" className="w-full" onClick={handleLogout}>
 									Выйти
