@@ -6,7 +6,7 @@ const NotFound = () => {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center px-4">
 			<div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-lg">
-				<p className="text-sm uppercase tracking-[0.4em] text-primary/70">Поддержка++</p>
+				<p className="text-sm uppercase tracking-[0.4em] text-primary/70">Рука помощи</p>
 				<h1 className="mt-2 text-5xl font-bold text-slate-900">404</h1>
 				<p className="mt-4 text-lg text-muted-foreground">
 					Страница <span className="font-semibold">{location.pathname}</span> не найдена. Выберите действие, чтобы продолжить.

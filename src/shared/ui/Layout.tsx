@@ -82,13 +82,16 @@ export const Layout = ({ children, title }: LayoutProps) => {
 					</div>
 				</div>
 
-				<div className="app-shell flex items-center gap-4 py-3">
+				<div className="app-shell flex items-center gap-4">
 					<Link to="/dashboard" className="flex items-center gap-3">
-						<div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
-							<Heart className="w-6 h-6" />
-						</div>
+						<img
+							src="/logo-ruka.svg"
+							alt="Рука помощи"
+							className="w-12 h-12 rounded-2xl border border-primary/20 bg-white shadow-sm"
+							loading="lazy"
+						/>
 						<div>
-							<p className="text-xl font-bold leading-tight">Поддержка++</p>
+							<p className="text-xl font-bold leading-tight">Рука помощи</p>
 							<p className="text-sm text-muted-foreground">Льготы в один клик</p>
 						</div>
 					</Link>
@@ -165,7 +168,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 			<main className="app-shell flex-1 w-full py-8 md:py-10">
 				{title && (
 					<div className="mb-8 space-y-2">
-						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Поддержка++</p>
+						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Рука помощи</p>
 						<h1 className="text-3xl md:text-4xl font-bold text-slate-900">{title}</h1>
 					</div>
 				)}
@@ -175,7 +178,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 			<footer className="border-t border-border bg-white mt-12 no-print safe-area-bottom">
 				<div className="app-shell py-8 grid gap-6 text-sm text-muted-foreground md:grid-cols-3">
 					<div>
-						<p className="font-semibold text-foreground">Поддержка++</p>
+						<p className="font-semibold text-foreground">Рука помощи</p>
 						<p className="mt-2">Цифровой помощник рассказывает, какие льготы, скидки и выплаты положены малозащищённым гражданам.</p>
 					</div>
 					<div>

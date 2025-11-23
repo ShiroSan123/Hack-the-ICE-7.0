@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => ({
 				type: 'module'
 			},
 			manifest: {
-				name: 'Поддержка++ | Социальный Навигатор',
-				short_name: 'Поддержка++',
+				name: 'Рука помощи | Социальный Навигатор',
+				short_name: 'Рука помощи',
 				description: 'Социальный навигатор для льготных категорий граждан',
 				lang: 'ru',
 				dir: 'ltr',
@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => ({
 					{
 						name: 'Ассистент',
 						short_name: 'Ассистент',
-						description: 'Чат-бот Поддержка++',
+						description: 'Чат-бот Рука помощи',
 						url: '/assistant'
 					}
 				],

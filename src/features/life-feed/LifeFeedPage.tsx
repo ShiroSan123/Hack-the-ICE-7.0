@@ -230,7 +230,7 @@ export const LifeFeedPage = () => {
 							<div className="space-y-2">
 								<p className="text-sm uppercase tracking-[0.3em] text-primary/80">Основной режим</p>
 								<h2 className="text-3xl font-bold leading-tight">
-									{user ? `Здравствуйте, ${user.name || 'пользователь'}!` : 'Добро пожаловать в Поддержка++'}
+									{user ? `Здравствуйте, ${user.name || 'пользователь'}!` : 'Добро пожаловать в «Руку помощи»'}
 								</h2>
 								<p className="text-lg text-muted-foreground">
 									Следим за льготами, скидками и лекарствами вашего региона, чтобы вы не пропустили помощь.

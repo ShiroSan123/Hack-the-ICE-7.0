@@ -33,7 +33,7 @@ export const ChatBotPage = () => {
 		{
 			id: 'assistant-hello',
 			role: 'assistant',
-			text: 'Здравствуйте! Я ассистент Поддержка++. Расскажите, какую льготу или помощь вы ищете, и я подскажу шаги и документы.',
+			text: 'Здравствуйте! Я ассистент Руки помощи. Расскажите, какую льготу или помощь вы ищете, и я подскажу шаги и документы.',
 			timestamp: new Date().toISOString(),
 		},
 	]);
@@ -110,7 +110,7 @@ const buildAssistantReply = (question: string): ChatMessage => {
 	};
 
 	return (
-		<Layout title="Чат-бот Поддержка++">
+		<Layout title="Чат-бот Рука помощи">
 			<div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
 				<section className="rounded-3xl border border-border/80 bg-white p-4 md:p-6 flex flex-col">
 					<div className="flex items-center gap-3 mb-4">

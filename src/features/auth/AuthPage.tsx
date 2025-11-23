@@ -56,7 +56,7 @@ export const AuthPage = () => {
 					</div>
 					<CardTitle className="text-3xl">Добро пожаловать</CardTitle>
 					<CardDescription className="text-lg">
-						Социальный навигатор «Поддержка++»
+						Социальный навигатор «Рука помощи»
 					</CardDescription>
 				</CardHeader>
 

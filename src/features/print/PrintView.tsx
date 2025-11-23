@@ -616,7 +616,7 @@ export const PrintView = () => {
 					)}
 
 					<footer className="print-friendly mt-12 rounded-3xl border border-border bg-white p-6 text-center text-sm text-muted-foreground">
-						<p className="text-base font-semibold text-foreground">Поддержка++ • Социальный навигатор</p>
+						<p className="text-base font-semibold text-foreground">Рука помощи • Социальный навигатор</p>
 						<p className="mt-2">© 2024 • Регион {user?.region || '—'} • Горячая линия 122</p>
 					</footer>
 				</div>
