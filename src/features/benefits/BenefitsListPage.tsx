@@ -9,6 +9,7 @@ import { Loader2, Lightbulb, MessageCircle, Printer } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Link } from 'react-router-dom';
+import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 
 export const BenefitsListPage = () => {
 	const { benefits, setBenefits, hiddenBenefitIds, user } = useAppStore();
@@ -32,15 +33,18 @@ export const BenefitsListPage = () => {
 		loadBenefits();
 	}, [setBenefits, user]);
 
+	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
+
 	const accessibleBenefits = useMemo(() => {
 		if (!user) return benefits;
 		return benefits.filter((benefit: Benefit) => {
 			const matchesRegion =
 				benefit.regions.includes(user.region) || benefit.regions.includes('all');
-			const matchesCategory = benefit.targetGroups.includes(user.category);
+			const matchesCategory =
+				!normalizedUserCategory || benefit.targetGroups.includes(normalizedUserCategory);
 			return matchesRegion && matchesCategory;
 		});
-	}, [benefits, user]);
+	}, [benefits, normalizedUserCategory, user]);
 
 	const filteredBenefits = accessibleBenefits.filter((benefit: Benefit) => {
 		// Filter hidden
@@ -52,7 +56,7 @@ export const BenefitsListPage = () => {
 		}
 
 		// Filter by user category
-		if (user && !benefit.targetGroups.includes(user.category)) {
+		if (normalizedUserCategory && !benefit.targetGroups.includes(normalizedUserCategory)) {
 			return false;
 		}
 

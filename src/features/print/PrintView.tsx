@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatCurrency } from '@/shared/lib/formatters';
+import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 import type { Benefit } from '@/shared/types';
 
 type PrintQrResult = OtpRequestResponse & {
@@ -83,15 +84,16 @@ export const PrintView = () => {
 			minute: '2-digit',
 		});
 	}, []);
+	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
 	const userBenefits = useMemo(() => {
 		if (!user) return benefits;
 		return benefits.filter((benefit) => {
 			const matchesRegion =
 				benefit.regions.includes(user.region) || benefit.regions.includes('all');
-			const matchesCategory = benefit.targetGroups.includes(user.category);
+			const matchesCategory = !normalizedUserCategory || benefit.targetGroups.includes(normalizedUserCategory);
 			return matchesRegion && matchesCategory;
 		});
-	}, [benefits, user]);
+	}, [benefits, normalizedUserCategory, user]);
 	const soonExpiring = useMemo(() => {
 		return userBenefits
 			.filter((benefit) => typeof benefit.expiresIn === 'number')

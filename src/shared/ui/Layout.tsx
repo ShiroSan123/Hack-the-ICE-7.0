@@ -58,6 +58,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 			veteran: 'Ветеран',
 			'large-family': 'Многодетная семья',
 			'low-income': 'Малоимущий',
+			russia: 'Россия (федеральные льготы)',
 		};
 		return map[user.category] ?? user.category;
 	}, [user?.category]);

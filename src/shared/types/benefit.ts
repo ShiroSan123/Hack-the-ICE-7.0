@@ -14,7 +14,8 @@ export type TargetGroup =
 	| 'veteran'
 	| 'large-family'
 	| 'low-income'
-	| 'child';
+	| 'child'
+	| 'russia';
 
 export interface Benefit {
 	id: string;

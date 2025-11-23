@@ -6,6 +6,7 @@ import { useAppStore } from '@/shared/store/useAppStore';
 import { benefitsApi } from '@/shared/api/benefitsApi';
 import { Benefit } from '@/shared/types';
 import { formatCurrency } from '@/shared/lib/formatters';
+import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 import { cn } from '@/lib/utils';
 import { MessageCircle, Send, Sparkles, Heart, Clock3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -53,14 +54,16 @@ export const ChatBotPage = () => {
 		}
 	}, [messages]);
 
+	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
 	const accessibleBenefits = useMemo(() => {
 		if (!user) return benefits;
 		return benefits.filter((benefit) => {
 			const matchesRegion = benefit.regions.includes(user.region) || benefit.regions.includes('all');
-			const matchesCategory = benefit.targetGroups.includes(user.category);
+			const matchesCategory =
+				!normalizedUserCategory || benefit.targetGroups.includes(normalizedUserCategory);
 			return matchesRegion && matchesCategory;
 		});
-	}, [benefits, user]);
+	}, [benefits, normalizedUserCategory, user]);
 
 const buildAssistantReply = (question: string): ChatMessage => {
 		const normalized = question.toLowerCase();

@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabaseClient';
 import { calculateDaysUntil } from '@/shared/lib/formatters';
+import { normalizeTargetGroups } from '@/shared/lib/targetGroups';
 import { Benefit, UserProfile } from '../types';
 
 type BenefitRow = {
@@ -24,7 +25,7 @@ const mapRowToBenefit = (row: BenefitRow): Benefit => ({
 	title: row.title,
 	description: row.description,
 	type: row.type as Benefit['type'],
-	targetGroups: row.target_groups ?? [],
+	targetGroups: normalizeTargetGroups(row.target_groups),
 	regions: row.regions ?? [],
 	validFrom: row.valid_from ?? '',
 	validTo: row.valid_to,

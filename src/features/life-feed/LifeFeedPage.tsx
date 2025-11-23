@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useTTS } from '@/shared/lib/useTTS';
 import { formatCurrency } from '@/shared/lib/formatters';
+import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 import { PriorityStack, PriorityCardData } from './PriorityStack';
 
 export const LifeFeedPage = () => {
@@ -35,6 +36,7 @@ export const LifeFeedPage = () => {
 	} = useAppStore();
 	const [loading, setLoading] = useState(true);
 	const { speak, speaking } = useTTS();
+	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
 
 	useEffect(() => {
 		setLoading(true);
@@ -62,10 +64,10 @@ export const LifeFeedPage = () => {
 		if (!user) return benefits;
 		return benefits.filter(
 			(benefit: Benefit) =>
-				benefit.targetGroups.includes(user.category) &&
+				(!normalizedUserCategory || benefit.targetGroups.includes(normalizedUserCategory)) &&
 				(benefit.regions.includes(user.region) || benefit.regions.includes('all'))
 		);
-	}, [benefits, user]);
+	}, [benefits, normalizedUserCategory, user]);
 
 	const newBenefits = accessibleBenefits.filter((b: Benefit) => b.isNew).slice(0, 3);
 	const expiringBenefits = accessibleBenefits
@@ -73,8 +75,10 @@ export const LifeFeedPage = () => {
 		.slice(0, 3);
 	const userOffers = user
 		? offers
-			.filter((o: Offer) =>
-				o.targetGroups.includes(user.category) && o.regions.includes(user.region)
+			.filter(
+				(o: Offer) =>
+					(!normalizedUserCategory || o.targetGroups.includes(normalizedUserCategory)) &&
+					o.regions.includes(user.region)
 			)
 			.slice(0, 3)
 		: offers.slice(0, 3);
@@ -102,7 +106,7 @@ export const LifeFeedPage = () => {
 			if (offer.category !== 'Медицина') return false;
 			if (!user) return true;
 			return (
-				offer.targetGroups.includes(user.category) &&
+				(!normalizedUserCategory || offer.targetGroups.includes(normalizedUserCategory)) &&
 				offer.regions.includes(user.region)
 			);
 		});
@@ -143,7 +147,7 @@ export const LifeFeedPage = () => {
 		const availableBenefits = user
 			? benefits.filter(
 				(benefit) =>
-					benefit.targetGroups.includes(user.category) &&
+					(!normalizedUserCategory || benefit.targetGroups.includes(normalizedUserCategory)) &&
 					benefit.regions.includes(user.region)
 			)
 			: benefits;
@@ -204,7 +208,7 @@ export const LifeFeedPage = () => {
 		}
 
 		return cards;
-	}, [benefits, medicines, offers, user]);
+	}, [benefits, medicines, offers, normalizedUserCategory, user]);
 
 	if (loading) {
 		return (

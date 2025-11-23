@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabaseClient';
+import { normalizeTargetGroups } from '@/shared/lib/targetGroups';
 import { Offer } from '../types/offer';
 
 type OfferRow = {
@@ -22,7 +23,7 @@ const mapRowToOffer = (row: OfferRow): Offer => ({
 	discount: row.discount ?? 0,
 	validFrom: row.valid_from ?? '',
 	validTo: row.valid_to ?? '',
-	targetGroups: row.target_groups ?? [],
+	targetGroups: normalizeTargetGroups(row.target_groups),
 	regions: row.regions ?? [],
 	category: row.category ?? '',
 });

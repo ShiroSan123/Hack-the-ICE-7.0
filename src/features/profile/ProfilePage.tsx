@@ -108,6 +108,7 @@ const CATEGORY_LABELS: Record<UserProfile['category'], string> = {
 	veteran: 'Ветеран',
 	'large-family': 'Многодетная семья',
 	'low-income': 'Малоимущий',
+	russia: 'Россия (федеральные льготы)',
 };
 
 const INTEREST_OPTIONS: InterestOption[] = [
@@ -581,13 +582,14 @@ export const ProfilePage = () => {
 												}
 												className="w-full h-12 rounded-2xl border-2 border-input bg-background px-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 												required
-											>
-												<option value="pensioner">Пенсионер</option>
-												<option value="disabled">Инвалид</option>
-												<option value="veteran">Ветеран</option>
-												<option value="large-family">Многодетная семья</option>
-												<option value="low-income">Малоимущий</option>
-											</select>
+												>
+													<option value="pensioner">Пенсионер</option>
+													<option value="disabled">Инвалид</option>
+													<option value="veteran">Ветеран</option>
+													<option value="large-family">Многодетная семья</option>
+													<option value="low-income">Малоимущий</option>
+													<option value="russia">Россия (федеральные льготы)</option>
+												</select>
 											<p className="text-xs text-muted-foreground">Так мы подскажем, что важно принести в МФЦ.</p>
 										</label>
 
