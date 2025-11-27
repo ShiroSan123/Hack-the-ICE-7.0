@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { Button } from '@/shared/ui/Button';
 import { useAppStore } from '@/shared/store/useAppStore';
 import { requestOtpCode, type OtpRequestResponse } from '@/shared/api/otpClient';
@@ -263,17 +261,22 @@ export const PrintView = () => {
 		void generateQr(normalizedAutoPhone);
 	}, [normalizedAutoPhone, qrLoading, generateQr]);
 
-	const handleDownloadPdf = async () => {
-		if (!contentRef.current) return;
-		setDownloading(true);
-		try {
-			const canvas = await html2canvas(contentRef.current, {
-				scale: 2,
-				useCORS: true,
-				scrollY: -window.scrollY,
-			});
-			const imgData = canvas.toDataURL('image/png');
-			const pdf = new jsPDF('p', 'mm', 'a4');
+const handleDownloadPdf = async () => {
+	if (!contentRef.current) return;
+	setDownloading(true);
+	try {
+		const [{ default: html2canvas }, { default: JsPDF }] = await Promise.all([
+			import('html2canvas'),
+			import('jspdf'),
+		]);
+
+		const canvas = await html2canvas(contentRef.current, {
+			scale: 2,
+			useCORS: true,
+			scrollY: -window.scrollY,
+		});
+		const imgData = canvas.toDataURL('image/png');
+		const pdf = new JsPDF('p', 'mm', 'a4');
 			const pdfWidth = pdf.internal.pageSize.getWidth();
 			const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 			const pageHeight = pdf.internal.pageSize.getHeight();

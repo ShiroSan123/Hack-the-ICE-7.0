@@ -1,24 +1,26 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { AuthPage } from "./features/auth/AuthPage";
-import { ProfilePage } from "./features/profile/ProfilePage";
-import { BenefitsListPage } from "./features/benefits/BenefitsListPage";
-import { BenefitDetailsPage } from "./features/benefits/BenefitDetailsPage";
-import { LifeFeedPage } from "./features/life-feed/LifeFeedPage";
-import { AptekaPage } from "./features/apteka/AptekaPage";
-import { SimpleModePage } from "./features/simple-mode/SimpleModePage";
-import { PrintView } from "./features/print/PrintView";
-import { ChatBotPage } from "./features/chat/ChatBotPage";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./shared/router/ProtectedRoute";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { Button } from "./shared/ui/Button";
 import { supabase } from "./shared/lib/supabaseClient";
 import { useAppStore } from "./shared/store/useAppStore";
+
+const AuthPage = lazy(() => import("./features/auth/AuthPage").then((mod) => ({ default: mod.AuthPage })));
+const ProfilePage = lazy(() => import("./features/profile/ProfilePage").then((mod) => ({ default: mod.ProfilePage })));
+const BenefitsListPage = lazy(() => import("./features/benefits/BenefitsListPage").then((mod) => ({ default: mod.BenefitsListPage })));
+const BenefitDetailsPage = lazy(() => import("./features/benefits/BenefitDetailsPage").then((mod) => ({ default: mod.BenefitDetailsPage })));
+const LifeFeedPage = lazy(() => import("./features/life-feed/LifeFeedPage").then((mod) => ({ default: mod.LifeFeedPage })));
+const AptekaPage = lazy(() => import("./features/apteka/AptekaPage").then((mod) => ({ default: mod.AptekaPage })));
+const SimpleModePage = lazy(() => import("./features/simple-mode/SimpleModePage").then((mod) => ({ default: mod.SimpleModePage })));
+const PrintView = lazy(() => import("./features/print/PrintView").then((mod) => ({ default: mod.PrintView })));
+const ChatBotPage = lazy(() => import("./features/chat/ChatBotPage").then((mod) => ({ default: mod.ChatBotPage })));
 
 const queryClient = new QueryClient();
 
@@ -97,62 +99,73 @@ const App = () => {
 				<TooltipProvider>
 					<Toaster />
 					<Sonner />
-					<HashRouter>
-						<Routes>
-							<Route path="/auth" element={<AuthEntryRoute />} />
-							<Route path="/" element={<RootRoute />} />
+					<Suspense
+						fallback={
+							<div className="min-h-screen flex items-center justify-center bg-background">
+								<div className="flex flex-col items-center gap-4 text-center">
+									<Loader2 className="w-10 h-10 animate-spin text-primary" />
+									<p className="text-lg font-medium">Загружаем интерфейс...</p>
+								</div>
+							</div>
+						}
+					>
+						<HashRouter>
+							<Routes>
+								<Route path="/auth" element={<AuthEntryRoute />} />
+								<Route path="/" element={<RootRoute />} />
 
-							<Route path="/dashboard" element={
-								<ProtectedRoute>
-									<LifeFeedPage />
-								</ProtectedRoute>
-							} />
+								<Route path="/dashboard" element={
+									<ProtectedRoute>
+										<LifeFeedPage />
+									</ProtectedRoute>
+								} />
 
-							<Route path="/profile" element={
-								<ProtectedRoute>
-									<ProfilePage />
-								</ProtectedRoute>
-							} />
+								<Route path="/profile" element={
+									<ProtectedRoute>
+										<ProfilePage />
+									</ProtectedRoute>
+								} />
 
-							<Route path="/benefits" element={
-								<ProtectedRoute>
-									<BenefitsListPage />
-								</ProtectedRoute>
-							} />
+								<Route path="/benefits" element={
+									<ProtectedRoute>
+										<BenefitsListPage />
+									</ProtectedRoute>
+								} />
 
-							<Route path="/benefits/:id" element={
-								<ProtectedRoute>
-									<BenefitDetailsPage />
-								</ProtectedRoute>
-							} />
+								<Route path="/benefits/:id" element={
+									<ProtectedRoute>
+										<BenefitDetailsPage />
+									</ProtectedRoute>
+								} />
 
-							<Route path="/apteka" element={
-								<ProtectedRoute>
-									<AptekaPage />
-								</ProtectedRoute>
-							} />
+								<Route path="/apteka" element={
+									<ProtectedRoute>
+										<AptekaPage />
+									</ProtectedRoute>
+								} />
 
-							<Route path="/simple" element={
-								<ProtectedRoute>
-									<SimpleModePage />
-								</ProtectedRoute>
-							} />
+								<Route path="/simple" element={
+									<ProtectedRoute>
+										<SimpleModePage />
+									</ProtectedRoute>
+								} />
 
-					<Route path="/print" element={
-						<ProtectedRoute>
-							<PrintView />
-						</ProtectedRoute>
-					} />
+								<Route path="/print" element={
+									<ProtectedRoute>
+										<PrintView />
+									</ProtectedRoute>
+								} />
 
-					<Route path="/assistant" element={
-						<ProtectedRoute>
-							<ChatBotPage />
-						</ProtectedRoute>
-					} />
+								<Route path="/assistant" element={
+									<ProtectedRoute>
+										<ChatBotPage />
+									</ProtectedRoute>
+								} />
 
-					<Route path="*" element={<NotFound />} />
+								<Route path="*" element={<NotFound />} />
 							</Routes>
 						</HashRouter>
+					</Suspense>
 					</TooltipProvider>
 				</AuthProvider>
 			</QueryClientProvider>

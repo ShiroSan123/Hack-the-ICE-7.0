@@ -35,7 +35,7 @@ export const LifeFeedPage = () => {
 		setMedicines,
 	} = useAppStore();
 	const [loading, setLoading] = useState(true);
-	const { speak, speaking } = useTTS();
+	const { speak, speaking, available: ttsAvailable } = useTTS();
 	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
 
 	useEffect(() => {
@@ -88,6 +88,7 @@ export const LifeFeedPage = () => {
 	const medsCount = medicines.length;
 
 	const handleSpeak = (text: string) => {
+		if (!ttsAvailable) return;
 		speak(text);
 	};
 
@@ -232,8 +233,11 @@ export const LifeFeedPage = () => {
 								<h2 className="text-3xl font-bold leading-tight">
 									{user ? `Здравствуйте, ${user.name || 'пользователь'}!` : 'Добро пожаловать в «Руку помощи»'}
 								</h2>
-								<p className="text-lg text-muted-foreground">
+								<p className="text-lg text-muted-foreground hidden md:block">
 									Следим за льготами, скидками и лекарствами вашего региона, чтобы вы не пропустили помощь.
+								</p>
+								<p className="text-base text-muted-foreground md:hidden">
+									Показываем только важное: льготы, сроки и лекарства вашего региона.
 								</p>
 							</div>
 							<div className="grid sm:grid-cols-3 gap-4">
@@ -268,24 +272,27 @@ export const LifeFeedPage = () => {
 						<div>
 							<p className="text-sm uppercase tracking-[0.4em] text-white/70">Что важно</p>
 							<h3 className="text-2xl font-semibold leading-tight">Контроль сроков и документов</h3>
-							<p className="text-base text-white/90 mt-2">
+							<p className="text-base text-white/90 mt-2 hidden md:block">
 								Мы уже собрали для вас ключевые шаги и документы. Если что-то нужно озвучить или подсказать — нажмите кнопку «Ассистент».
 							</p>
+							<p className="text-sm text-white/80 mt-1 md:hidden">
+								Сроки и документы под контролем. Нужна подсказка — жмите «Ассистент».
+							</p>
 						</div>
-						<ul className="space-y-3 text-sm text-white/90">
+						<ul className="space-y-2 text-sm text-white/90">
 							<li className="flex items-center gap-3">
 								<CalendarDays className="w-5 h-5" />
 								{urgentCount > 0
-									? `У ${urgentCount} выплат истекает срок. Успейте обновить заявление.`
-									: 'Ни одна льгота не требует срочных действий'}
+									? `У ${urgentCount} выплат истекает срок — обновите заявление.`
+									: 'Без срочных задач'}
 							</li>
 							<li className="flex items-center gap-3">
 								<ShieldCheck className="w-5 h-5" />
-								Проверены требования региона {user?.region || 'вашего региона'}
+								Требования региона {user?.region || 'вашего региона'} учтены
 							</li>
 							<li className="flex items-center gap-3">
 								<Headset className="w-5 h-5" />
-								Горячая линия 122 подскажет, если понадобится бумажный пакет
+								Горячая линия 122 — если нужен бумажный пакет
 							</li>
 						</ul>
 						<Button variant="secondary" size="lg" asChild className="self-start text-slate-900">
@@ -303,8 +310,11 @@ export const LifeFeedPage = () => {
 								<Sparkles className="w-6 h-6 text-accent" />
 								Новые возможности
 							</CardTitle>
-							<CardDescription>
+							<CardDescription className="hidden md:block">
 								Мы нашли льготы и скидки, которые недавно стали доступны в вашем профиле.
+							</CardDescription>
+							<CardDescription className="md:hidden text-sm">
+								Льготы, которые только появились в вашем профиле.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -317,7 +327,8 @@ export const LifeFeedPage = () => {
 										<div>
 											<p className="text-xs uppercase tracking-[0.3em] text-accent">Новое</p>
 											<h3 className="text-xl font-semibold">{benefit.title}</h3>
-											<p className="text-base text-muted-foreground">{benefit.description}</p>
+											<p className="text-base text-muted-foreground hidden md:block">{benefit.description}</p>
+											<p className="text-sm text-muted-foreground md:hidden">Кратко: детали в карточке.</p>
 										</div>
 										<div className="flex flex-wrap gap-3">
 											{benefit.savingsPerMonth && (
@@ -332,7 +343,7 @@ export const LifeFeedPage = () => {
 												variant="outline"
 												size="sm"
 												onClick={() => handleSpeak(`${benefit.title}. ${benefit.description}`)}
-												disabled={speaking}
+												disabled={speaking || !ttsAvailable}
 											>
 												<Volume2 className="w-4 h-4" />
 												Озвучить
@@ -350,9 +361,8 @@ export const LifeFeedPage = () => {
 								<AlertCircle className="w-6 h-6 text-destructive" />
 								Не упустите сроки
 							</CardTitle>
-							<CardDescription>
-								Льготы, которые нужно обновить в ближайшие недели.
-							</CardDescription>
+							<CardDescription className="hidden md:block">Льготы, которые нужно обновить в ближайшие недели.</CardDescription>
+							<CardDescription className="md:hidden text-sm">Скоро истекают — обновите.</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{expiringBenefits.length === 0 && (
@@ -363,7 +373,8 @@ export const LifeFeedPage = () => {
 									<div className="flex items-start justify-between gap-3">
 										<div>
 											<p className="text-sm font-semibold">{benefit.title}</p>
-											<p className="text-sm text-muted-foreground">{benefit.description}</p>
+											<p className="text-sm text-muted-foreground hidden md:block">{benefit.description}</p>
+											<p className="text-xs text-muted-foreground md:hidden">Детали внутри.</p>
 										</div>
 										<div className="text-right text-destructive text-sm font-semibold">
 											{benefit.expiresIn} дн.
@@ -385,7 +396,8 @@ export const LifeFeedPage = () => {
 								<ShoppingBag className="w-6 h-6 text-primary" />
 								Персональные предложения
 							</CardTitle>
-							<CardDescription>Скидки и акции от партнёров вашего региона.</CardDescription>
+							<CardDescription className="hidden md:block">Скидки и акции от партнёров вашего региона.</CardDescription>
+							<CardDescription className="md:hidden text-sm">Скидки партнёров рядом.</CardDescription>
 						</CardHeader>
 						<CardContent className="grid gap-3 md:grid-cols-2">
 							{userOffers.length === 0 && (
@@ -400,12 +412,13 @@ export const LifeFeedPage = () => {
 										</div>
 										<span className="text-2xl font-bold text-primary">-{offer.discount}%</span>
 									</div>
-									<p className="text-sm text-muted-foreground">{offer.description}</p>
+									<p className="text-sm text-muted-foreground hidden md:block">{offer.description}</p>
+									<p className="text-xs text-muted-foreground md:hidden">Детали акции внутри.</p>
 									<Button
 										variant="outline"
 										size="sm"
 										onClick={() => handleSpeak(`${offer.title}. ${offer.description}`)}
-										disabled={speaking}
+										disabled={speaking || !ttsAvailable}
 									>
 										<Volume2 className="w-4 h-4" />
 										Озвучить

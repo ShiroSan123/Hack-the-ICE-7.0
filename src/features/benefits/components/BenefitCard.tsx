@@ -11,7 +11,8 @@ interface BenefitCardProps {
 }
 
 export const BenefitCard = ({ benefit }: BenefitCardProps) => {
-	const { speak, speaking } = useTTS();
+	const { speak, speaking, available: ttsAvailable } = useTTS();
+	const stepsPreview = benefit.steps.slice(0, 2);
 
 	const getBenefitTypeLabel = (type: string) => {
 		const types: Record<string, string> = {
@@ -28,28 +29,38 @@ export const BenefitCard = ({ benefit }: BenefitCardProps) => {
 	};
 
 	const handleSpeak = () => {
+		if (!ttsAvailable) return;
 		const text = `${benefit.title}. ${benefit.description}`;
 		speak(text);
 	};
 
 	return (
-		<Card className="rounded-3xl border border-border/70 bg-white shadow-sm hover:shadow-lg transition-shadow">
-			<CardHeader className="space-y-3">
-				<div className="flex items-start justify-between gap-3">
-					<div>
+		<Card className="relative overflow-hidden rounded-3xl border border-border/70 bg-white shadow-sm hover:shadow-xl transition-all">
+			<div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-primary/10 via-white to-accent/10" aria-hidden />
+			<CardHeader className="relative space-y-4">
+				<div className="flex flex-wrap items-start justify-between gap-3">
+					<div className="space-y-2">
 						<div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-							<span>{getBenefitTypeLabel(benefit.type)}</span>
+							<span className="rounded-full bg-white/80 px-3 py-1 text-primary border border-primary/20">
+								{getBenefitTypeLabel(benefit.type)}
+							</span>
 							{benefit.isNew && (
-								<span className="text-accent flex items-center gap-1">
+								<span className="flex items-center gap-1 rounded-full bg-accent text-accent-foreground px-3 py-1">
 									<Sparkles className="w-3 h-3" />
 									Новое
+								</span>
+							)}
+							{benefit.expiresIn && (
+								<span className="flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-3 py-1">
+									<AlertCircle className="w-3 h-3" />
+									{benefit.expiresIn} дн.
 								</span>
 							)}
 						</div>
 						<CardTitle className="text-2xl leading-tight">{benefit.title}</CardTitle>
 					</div>
 					{benefit.savingsPerMonth && (
-						<div className="rounded-2xl bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+						<div className="rounded-2xl bg-primary/10 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
 							Экономия {formatCurrency(benefit.savingsPerMonth)}/мес
 						</div>
 					)}
@@ -66,7 +77,7 @@ export const BenefitCard = ({ benefit }: BenefitCardProps) => {
 					</div>
 				)}
 				<div className="grid gap-3 md:grid-cols-3">
-					<div className="rounded-2xl border border-border/70 p-3">
+					<div className="rounded-2xl border border-border/70 bg-white/50 p-3">
 						<p className="text-xs uppercase tracking-wide text-muted-foreground">Действует</p>
 						<p className="text-sm font-semibold flex items-center gap-2">
 							<Clock3 className="w-4 h-4" />
@@ -74,7 +85,7 @@ export const BenefitCard = ({ benefit }: BenefitCardProps) => {
 						</p>
 					</div>
 					{benefit.partner && (
-						<div className="rounded-2xl border border-border/70 p-3">
+						<div className="rounded-2xl border border-border/70 bg-white/50 p-3">
 							<p className="text-xs uppercase tracking-wide text-muted-foreground">Партнёр</p>
 							<p className="text-sm font-semibold flex items-center gap-2">
 								<FileText className="w-4 h-4" />
@@ -82,11 +93,27 @@ export const BenefitCard = ({ benefit }: BenefitCardProps) => {
 							</p>
 						</div>
 					)}
-					<div className="rounded-2xl border border-border/70 p-3">
+					<div className="rounded-2xl border border-border/70 bg-white/50 p-3">
 						<p className="text-xs uppercase tracking-wide text-muted-foreground">Требуется документов</p>
 						<p className="text-sm font-semibold">{benefit.documents.length}</p>
 					</div>
 				</div>
+
+				{stepsPreview.length > 0 && (
+					<div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+						<p className="text-xs uppercase tracking-[0.3em] text-primary/80">Первые шаги</p>
+						<ul className="space-y-2">
+							{stepsPreview.map((step, index) => (
+								<li key={index} className="flex items-start gap-2 text-sm text-foreground">
+									<span className="mt-[2px] flex h-6 w-6 items-center justify-center rounded-full bg-white text-primary border border-primary/30 text-xs font-semibold">
+										{index + 1}
+									</span>
+									<span className="leading-snug">{step}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 			</CardContent>
 			<CardFooter className="flex flex-wrap gap-2">
 				<Button variant="default" size="lg" asChild className="flex-1 min-w-[180px]">
@@ -96,10 +123,11 @@ export const BenefitCard = ({ benefit }: BenefitCardProps) => {
 					variant="outline"
 					size="lg"
 					onClick={handleSpeak}
-					disabled={speaking}
+					disabled={speaking || !ttsAvailable}
 					aria-label="Озвучить"
 				>
 					<Volume2 className="w-5 h-5" />
+					{!ttsAvailable && <span className="text-xs text-muted-foreground">Нет озвучки</span>}
 				</Button>
 			</CardFooter>
 		</Card>

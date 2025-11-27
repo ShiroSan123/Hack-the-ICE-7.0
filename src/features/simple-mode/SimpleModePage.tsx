@@ -6,7 +6,7 @@ import { ModeSwitch } from '@/shared/ui/ModeSwitch';
 
 export const SimpleModePage = () => {
 	const navigate = useNavigate();
-	const { speak } = useTTS();
+	const { speak, available: ttsAvailable } = useTTS();
 
 	const buttons = [
 		{
@@ -47,12 +47,16 @@ export const SimpleModePage = () => {
 	];
 
 	const handleClick = (label: string, to: string) => {
-		speak(label);
-		setTimeout(() => navigate(to), 500);
+		if (ttsAvailable) {
+			speak(label);
+			setTimeout(() => navigate(to), 500);
+			return;
+		}
+		navigate(to);
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex flex-col safe-area-top safe-area-bottom">
+		<div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex flex-col safe-area-top safe-area-bottom pb-24">
 			<div className="app-shell w-full max-w-5xl space-y-8 py-6">
 				<div className="flex flex-col gap-4 rounded-3xl bg-white/80 p-6 shadow-sm">
 					<ModeSwitch />
@@ -106,6 +110,23 @@ export const SimpleModePage = () => {
 					>
 						<span className="text-2xl font-bold">Печать памятки</span>
 						<span className="text-lg text-muted-foreground">Список льгот и лекарств на бумаге</span>
+					</Button>
+				</div>
+			</div>
+
+			<div className="no-print fixed inset-x-0 bottom-0 z-40 bg-white/90 backdrop-blur border-t border-border/70 safe-area-bottom">
+				<div className="app-shell max-w-4xl mx-auto py-3 grid grid-cols-3 gap-2 text-sm font-semibold">
+					<Button variant="ghost" size="xl" onClick={() => handleClick('Главная', '/dashboard')} className="flex flex-col gap-1 h-auto py-3">
+						<span>Главная</span>
+						<span className="text-muted-foreground text-xs">к льготам</span>
+					</Button>
+					<Button variant="accent" size="xl" onClick={() => handleClick('Ассистент', '/assistant')} className="flex flex-col gap-1 h-auto py-3">
+						<span>Ассистент</span>
+						<span className="text-muted-foreground text-xs text-accent-foreground/90">быстрый вопрос</span>
+					</Button>
+					<Button variant="outline" size="xl" onClick={() => handleClick('Печать', '/print')} className="flex flex-col gap-1 h-auto py-3">
+						<span>Печать</span>
+						<span className="text-muted-foreground text-xs">памятка</span>
 					</Button>
 				</div>
 			</div>

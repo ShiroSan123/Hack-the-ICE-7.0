@@ -27,7 +27,7 @@ export const BenefitDetailsPage = () => {
 	const navigate = useNavigate();
 	const { toggleHiddenBenefit, hiddenBenefitIds } = useAppStore();
 	const [benefit, setBenefit] = useState<Benefit | null>(null);
-	const { speak, speaking } = useTTS();
+	const { speak, speaking, available: ttsAvailable } = useTTS();
 
 	const isHidden = id ? hiddenBenefitIds.includes(id) : false;
 
@@ -59,6 +59,7 @@ export const BenefitDetailsPage = () => {
 	}
 
 	const handleSpeak = () => {
+		if (!ttsAvailable) return;
 		const text = `${benefit.title}. ${benefit.description}. Требования: ${benefit.requirements.join(', ')}. Шаги: ${benefit.steps.join(', ')}`;
 		speak(text);
 	};
@@ -99,7 +100,7 @@ export const BenefitDetailsPage = () => {
 						</span>
 					</div>
 					<div className="mt-6 flex flex-wrap gap-3">
-						<Button variant="accent" size="lg" onClick={handleSpeak} disabled={speaking}>
+						<Button variant="accent" size="lg" onClick={handleSpeak} disabled={speaking || !ttsAvailable}>
 							<Volume2 className="w-5 h-5" />
 							Озвучить льготу
 						</Button>

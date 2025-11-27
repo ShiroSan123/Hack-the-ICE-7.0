@@ -24,7 +24,7 @@ interface LayoutProps {
 
 export const Layout = ({ children, title }: LayoutProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
-	const { user, logout } = useAppStore();
+	const { user, logout, benefits, medicines } = useAppStore();
 	const { setManualUser } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -63,6 +63,21 @@ export const Layout = ({ children, title }: LayoutProps) => {
 		return map[user.category] ?? user.category;
 	}, [user?.category]);
 
+	const urgentCount = useMemo(
+		() =>
+			benefits.filter(
+				(benefit) => typeof benefit.expiresIn === 'number' && benefit.expiresIn < 90
+			).length,
+		[benefits]
+	);
+
+	const newCount = useMemo(
+		() => benefits.filter((benefit) => benefit.isNew).length,
+		[benefits]
+	);
+
+	const medsCount = medicines.length;
+
 	const isLinkActive = (match?: string[]) => {
 		if (!match || match.length === 0) return false;
 		return match.some((prefix) => location.pathname.startsWith(prefix));
@@ -74,10 +89,21 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				<div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent border-b border-primary/20">
 					<div className="app-shell py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 						<p className="font-semibold">Социальный навигатор для помощи льготникам</p>
-						<div className="flex flex-wrap gap-4 text-primary/80">
+						<div className="flex flex-wrap gap-4 text-primary/80 items-center">
 							<span>Горячая линия: 122</span>
 							<span>Регион: {user?.region || 'xxxxxxxxx'}</span>
 							{categoryLabel && <span>Категория: {categoryLabel}</span>}
+							<div className="flex flex-wrap gap-2">
+								<span className="rounded-full bg-white/80 border border-primary/30 px-3 py-1 text-xs font-semibold text-primary">
+									Новых: {newCount}
+								</span>
+								<span className="rounded-full bg-amber-50 border border-amber-300 px-3 py-1 text-xs font-semibold text-amber-700 motion-safe:animate-pulse">
+									Срочно: {urgentCount}
+								</span>
+								<span className="rounded-full bg-emerald-50 border border-emerald-300 px-3 py-1 text-xs font-semibold text-emerald-700">
+									Лекарства: {medsCount}
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>

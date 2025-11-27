@@ -28,10 +28,11 @@ type Props = {
 };
 
 export const PriorityStack = ({ cards }: Props) => {
-	if (cards.length === 0) return null;
+	const hasCards = cards.length > 0;
 
 	const [active, setActive] = useState(0);
 	const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+	const [reduceMotion, setReduceMotion] = useState(false);
 
 	const sliderCards = useMemo(
 		() => cards.map((card) => ({ ...card })),
@@ -52,6 +53,52 @@ export const PriorityStack = ({ cards }: Props) => {
 		};
 	}, [carouselApi]);
 
+	useEffect(() => {
+		if (typeof window === 'undefined' || typeof window.matchMedia === 'undefined') return;
+		const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const update = () => setReduceMotion(media.matches);
+		update();
+		media.addEventListener('change', update);
+		return () => media.removeEventListener('change', update);
+	}, []);
+
+	if (!hasCards) return null;
+
+	if (reduceMotion) {
+		return (
+			<section aria-label="Персональные подсказки" className="space-y-3">
+				<div className="flex items-center justify-between">
+					<div>
+						<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">важно сегодня</p>
+						<h2 className="text-2xl font-semibold">Ваши подсказки</h2>
+					</div>
+				</div>
+				<div className="grid gap-3">
+					{sliderCards.map((card) => (
+						<article key={card.id} className={`relative rounded-[28px] border border-white/40 bg-gradient-to-br ${card.accent} p-6 text-white shadow-lg`}>
+							<div className="absolute inset-0 rounded-[28px] border border-white/20 pointer-events-none" aria-hidden />
+							<div className="relative space-y-3">
+								<p className="text-[0.65rem] uppercase tracking-[0.4em] text-white/70">{card.badge}</p>
+								<h3 className="text-xl font-semibold leading-tight">{card.title}</h3>
+								<p className="text-sm text-white/90 leading-relaxed">{card.description}</p>
+								{card.action && (
+									<Button
+										variant="secondary"
+										size="sm"
+										asChild
+										className="bg-black/30 text-white font-medium backdrop-blur hover:bg-black/40"
+									>
+										<Link to={card.action.to}>{card.action.label}</Link>
+									</Button>
+								)}
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
+		);
+	}
+
 	return (
 		<section aria-label="Персональные подсказки" className="relative">
 			<div className="flex items-center justify-between mb-3">
@@ -69,8 +116,14 @@ export const PriorityStack = ({ cards }: Props) => {
 				opts={{ align: 'start', loop: sliderCards.length > 1 }}
 				setApi={setCarouselApi}
 			>
-				<CarouselContent>
-					{sliderCards.map((card) => (
+			<CarouselContent>
+				{sliderCards.map((card) => {
+					const shortDescription =
+						card.description.length > 120
+							? `${card.description.slice(0, 120).trim()}…`
+							: card.description;
+
+					return (
 						<CarouselItem key={card.id} className="md:basis-2/3 lg:basis-1/2">
 							<article className={`relative min-h-[220px] rounded-[32px] border border-white/30 p-6 md:p-8 text-white bg-gradient-to-br ${card.accent}`}>
 								<div className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/25 mix-blend-screen" />
@@ -83,7 +136,8 @@ export const PriorityStack = ({ cards }: Props) => {
 											<h3 className="text-2xl font-semibold leading-tight drop-shadow-lg">
 												{card.title}
 											</h3>
-											<p className="text-base text-white/90 leading-relaxed">{card.description}</p>
+											<p className="text-base text-white/90 leading-relaxed hidden md:block">{card.description}</p>
+											<p className="text-sm text-white/90 leading-relaxed md:hidden">{shortDescription}</p>
 										</div>
 										<div
 											className="hidden sm:flex items-center justify-center rounded-2xl bg-black/20 p-4 min-w-[72px] text-white"
@@ -111,12 +165,13 @@ export const PriorityStack = ({ cards }: Props) => {
 								</div>
 							</article>
 						</CarouselItem>
-					))}
-				</CarouselContent>
+					);
+				})}
+			</CarouselContent>
 
-				{sliderCards.length > 1 && (
-					<>
-						<CarouselPrevious className="left-2 top-1/2 -translate-y-1/2 border-none bg-card/70 text-primary shadow-lg hover:bg-card" />
+			{sliderCards.length > 1 && (
+				<>
+					<CarouselPrevious className="left-2 top-1/2 -translate-y-1/2 border-none bg-card/70 text-primary shadow-lg hover:bg-card" />
 						<CarouselNext className="right-2 top-1/2 -translate-y-1/2 border-none bg-card/70 text-primary shadow-lg hover:bg-card" />
 					</>
 				)}

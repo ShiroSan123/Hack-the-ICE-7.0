@@ -105,6 +105,12 @@
 		min-height: 100vh;
 		padding: 0;
 		padding-bottom: var(--safe-area-bottom);
+		background-image:
+			radial-gradient(circle at 20% 20%, rgba(62, 170, 125, 0.08), transparent 35%),
+			radial-gradient(circle at 80% 0%, rgba(255, 149, 64, 0.08), transparent 30%),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.94));
+		background-repeat: no-repeat;
+		background-size: 100% 100%;
 	}
 
 	h1 {

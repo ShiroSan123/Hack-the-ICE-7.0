@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const useTTS = () => {
 	const [speaking, setSpeaking] = useState(false);
 	const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+	const available = useMemo(() => {
+		if (typeof window === 'undefined') return false;
+		return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
+	}, []);
 
 	useEffect(() => {
+		if (!available) return;
+
 		const loadVoices = () => {
 			const availableVoices = window.speechSynthesis.getVoices();
 			setVoices(availableVoices);
@@ -16,9 +22,10 @@ export const useTTS = () => {
 		return () => {
 			window.speechSynthesis.cancel();
 		};
-	}, []);
+	}, [available]);
 
 	const speak = useCallback((text: string) => {
+		if (!available) return;
 		if (!text) return;
 
 		// Cancel any ongoing speech
@@ -45,12 +52,13 @@ export const useTTS = () => {
 		utterance.onerror = () => setSpeaking(false);
 
 		window.speechSynthesis.speak(utterance);
-	}, [voices]);
+	}, [available, voices]);
 
 	const stop = useCallback(() => {
+		if (!available) return;
 		window.speechSynthesis.cancel();
 		setSpeaking(false);
-	}, []);
+	}, [available]);
 
-	return { speak, stop, speaking };
+	return { speak, stop, speaking, available };
 };
