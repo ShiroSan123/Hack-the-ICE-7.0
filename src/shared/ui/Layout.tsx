@@ -203,7 +203,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				)}
 			</header>
 
-			<main className="app-shell flex-1 w-full py-8 md:py-10 pb-24 md:pb-12">
+			<main className="app-shell flex-1 w-full py-8 md:py-10 pb-28 md:pb-14">
 				{title && (
 					<div className="mb-8 space-y-2">
 						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Рука помощи</p>
@@ -232,7 +232,10 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				</div>
 			</footer>
 
-			<nav className="md:hidden no-print fixed inset-x-0 bottom-0 z-50 bg-white/95 backdrop-blur border-t border-border/80 safe-area-bottom">
+			<nav
+				className="md:hidden no-print fixed inset-x-0 bottom-0 z-50 bg-white/95 backdrop-blur border-t border-border/80"
+				style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
+			>
 				<div className="app-shell flex items-center justify-between gap-1 py-2">
 					{navigation.slice(0, 5).map((item) => {
 						const active = isLinkActive(item.match);
