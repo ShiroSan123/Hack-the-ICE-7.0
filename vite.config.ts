@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => ({
 		legacy({
 			targets: ['defaults', 'chrome >=61', 'android >=5', 'safari >=11'],
 			modernPolyfills: true,
-			additionalLegacyPolyfills: ['whatwg-fetch'],
 		}),
 		mode === "development" && componentTagger(),
 		VitePWA({
