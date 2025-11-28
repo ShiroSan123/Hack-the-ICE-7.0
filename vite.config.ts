@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
 	plugins: [
 		react(),
 		legacy({
-			targets: ['defaults', 'chrome 61', 'android 5'],
+			targets: ['defaults', 'chrome >=61', 'android >=5', 'safari >=11'],
 			modernPolyfills: true,
 			additionalLegacyPolyfills: ['whatwg-fetch'],
 		}),
@@ -134,9 +134,6 @@ export default defineConfig(({ mode }) => ({
 			}
 		})
 	].filter(Boolean),
-	build: {
-		target: 'es2017',
-	},
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
