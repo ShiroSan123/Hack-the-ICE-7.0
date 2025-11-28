@@ -7,6 +7,7 @@ type UserScopedState = {
 	offers: Offer[];
 	medicines: Medicine[];
 	hiddenBenefitIds: string[];
+	simpleModeEnabled?: boolean;
 };
 
 type UserStateMap = Record<string, UserScopedState>;
@@ -16,6 +17,7 @@ const createEmptyUserScopedState = (): UserScopedState => ({
 	offers: [],
 	medicines: [],
 	hiddenBenefitIds: [],
+	simpleModeEnabled: false,
 });
 
 const ensureUserScopedState = (
@@ -90,6 +92,7 @@ export const useAppStore = create<AppState>()(
 							offers: [],
 							medicines: [],
 							hiddenBenefitIds: [],
+							userData: state.userData,
 						};
 					}
 
@@ -98,9 +101,17 @@ export const useAppStore = create<AppState>()(
 						nextUserId
 					);
 
+					const mergedSimpleMode =
+						user?.simpleModeEnabled ??
+						scoped.simpleModeEnabled ??
+						false;
+
 					return {
 						...state,
-						user,
+						user: {
+							...user,
+							simpleModeEnabled: mergedSimpleMode,
+						},
 						activeUserId: nextUserId,
 						userData: map,
 						benefits: scoped.benefits,
@@ -176,13 +187,16 @@ export const useAppStore = create<AppState>()(
 
 			setSimpleMode: (enabled) =>
 				set((state) => {
-					if (!state.user) return state;
+					if (!state.user || !state.activeUserId) return state;
 					return {
 						...state,
 						user: {
 							...state.user,
 							simpleModeEnabled: enabled,
 						},
+						userData: updateUserScopedState(state.userData, state.activeUserId, {
+							simpleModeEnabled: enabled,
+						}),
 					};
 				}),
 

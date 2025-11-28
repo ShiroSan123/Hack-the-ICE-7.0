@@ -231,6 +231,30 @@ export const Layout = ({ children, title }: LayoutProps) => {
 					</div>
 				</div>
 			</footer>
+
+			<nav className="md:hidden no-print fixed inset-x-0 bottom-0 z-50 bg-white/95 backdrop-blur border-t border-border/80 safe-area-bottom">
+				<div className="app-shell flex items-center justify-between gap-1 py-2">
+					{navigation.slice(0, 5).map((item) => {
+						const active = isLinkActive(item.match);
+						return (
+							<Link
+								key={item.to}
+								to={item.to}
+								className={cn(
+									'flex flex-col items-center justify-center flex-1 gap-1 rounded-xl px-2 py-1 text-[13px] font-semibold transition-colors',
+									active
+										? 'text-primary bg-primary/10'
+										: 'text-muted-foreground hover:text-primary hover:bg-primary/5'
+								)}
+								aria-current={active ? 'page' : undefined}
+							>
+								<item.icon className="w-5 h-5" />
+								<span className="leading-none">{item.name}</span>
+							</Link>
+						);
+					})}
+				</div>
+			</nav>
 		</div>
 	);
 };

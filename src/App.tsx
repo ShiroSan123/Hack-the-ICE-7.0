@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +21,17 @@ const AptekaPage = lazy(() => import("./features/apteka/AptekaPage").then((mod) 
 const SimpleModePage = lazy(() => import("./features/simple-mode/SimpleModePage").then((mod) => ({ default: mod.SimpleModePage })));
 const PrintView = lazy(() => import("./features/print/PrintView").then((mod) => ({ default: mod.PrintView })));
 const ChatBotPage = lazy(() => import("./features/chat/ChatBotPage").then((mod) => ({ default: mod.ChatBotPage })));
+const SimpleLifeFeed = lazy(() => import("./features/simple-mode/SimpleLifeFeed").then((mod) => ({ default: mod.SimpleLifeFeed })));
+const SimpleBenefitsList = lazy(() => import("./features/simple-mode/SimpleBenefitsList").then((mod) => ({ default: mod.SimpleBenefitsList })));
+const SimpleBenefitDetails = lazy(() => import("./features/simple-mode/SimpleBenefitDetails").then((mod) => ({ default: mod.SimpleBenefitDetails })));
+const SimpleAptekaPage = lazy(() => import("./features/simple-mode/SimpleAptekaPage").then((mod) => ({ default: mod.SimpleAptekaPage })));
+const SimpleProfilePage = lazy(() => import("./features/simple-mode/SimpleProfilePage").then((mod) => ({ default: mod.SimpleProfilePage })));
+const SimpleChatBotPage = lazy(() => import("./features/simple-mode/SimpleChatBotPage").then((mod) => ({ default: mod.SimpleChatBotPage })));
+
+const SimpleAwareRoute = ({ simple, normal }: { simple: ReactNode; normal: ReactNode }) => {
+	const { user } = useAppStore();
+	return <>{user?.simpleModeEnabled ? simple : normal}</>;
+};
 
 const queryClient = new QueryClient();
 
@@ -109,62 +120,80 @@ const App = () => {
 							</div>
 						}
 					>
-						<HashRouter>
-							<Routes>
-								<Route path="/auth" element={<AuthEntryRoute />} />
-								<Route path="/" element={<RootRoute />} />
+					<HashRouter>
+						<Routes>
+							<Route path="/auth" element={<AuthEntryRoute />} />
+							<Route path="/" element={<RootRoute />} />
 
-								<Route path="/dashboard" element={
-									<ProtectedRoute>
-										<LifeFeedPage />
-									</ProtectedRoute>
-								} />
+							<Route path="/dashboard" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleLifeFeed />}
+										normal={<LifeFeedPage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="/profile" element={
-									<ProtectedRoute>
-										<ProfilePage />
-									</ProtectedRoute>
-								} />
+							<Route path="/profile" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleProfilePage />}
+										normal={<ProfilePage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="/benefits" element={
-									<ProtectedRoute>
-										<BenefitsListPage />
-									</ProtectedRoute>
-								} />
+							<Route path="/benefits" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleBenefitsList />}
+										normal={<BenefitsListPage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="/benefits/:id" element={
-									<ProtectedRoute>
-										<BenefitDetailsPage />
-									</ProtectedRoute>
-								} />
+							<Route path="/benefits/:id" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleBenefitDetails />}
+										normal={<BenefitDetailsPage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="/apteka" element={
-									<ProtectedRoute>
-										<AptekaPage />
-									</ProtectedRoute>
-								} />
+							<Route path="/apteka" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleAptekaPage />}
+										normal={<AptekaPage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="/simple" element={
-									<ProtectedRoute>
-										<SimpleModePage />
-									</ProtectedRoute>
-								} />
+							<Route path="/simple" element={
+								<ProtectedRoute>
+									<SimpleModePage />
+								</ProtectedRoute>
+							} />
 
-								<Route path="/print" element={
-									<ProtectedRoute>
-										<PrintView />
-									</ProtectedRoute>
-								} />
+							<Route path="/print" element={
+								<ProtectedRoute>
+									<PrintView />
+								</ProtectedRoute>
+							} />
 
-								<Route path="/assistant" element={
-									<ProtectedRoute>
-										<ChatBotPage />
-									</ProtectedRoute>
-								} />
+							<Route path="/assistant" element={
+								<ProtectedRoute>
+									<SimpleAwareRoute
+										simple={<SimpleChatBotPage />}
+										normal={<ChatBotPage />}
+									/>
+								</ProtectedRoute>
+							} />
 
-								<Route path="*" element={<NotFound />} />
-							</Routes>
-						</HashRouter>
+							<Route path="*" element={<NotFound />} />
+						</Routes>
+					</HashRouter>
 					</Suspense>
 					</TooltipProvider>
 				</AuthProvider>

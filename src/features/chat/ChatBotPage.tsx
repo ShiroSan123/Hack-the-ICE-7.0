@@ -9,7 +9,18 @@ import { Benefit } from '@/shared/types';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 import { cn } from '@/lib/utils';
-import { MessageCircle, Send, Sparkles, Heart, Clock3, BrainCircuit } from 'lucide-react';
+import {
+	MessageCircle,
+	Send,
+	Sparkles,
+	Heart,
+	Clock3,
+	BrainCircuit,
+	LayoutDashboard,
+	Heart as HeartIcon,
+	Pill,
+	FileText,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ChatMessage {
@@ -40,7 +51,7 @@ export const ChatBotPage = () => {
 		{
 			id: 'assistant-hello',
 			role: 'assistant',
-			text: 'Здравствуйте! Я ассистент Руки помощи. Расскажите, какую льготу или помощь вы ищете, и я подскажу шаги и документы.',
+			text: 'Здравствуйте! Я ассистент Руки помощи. Задайте вопрос — подскажу льготы, сроки и документы.',
 			timestamp: new Date().toISOString(),
 		},
 	]);
@@ -278,19 +289,60 @@ export const ChatBotPage = () => {
 		void sendMessage(input);
 	};
 
+	const renderBubble = (message: ChatMessage) => {
+		const isUser = message.role === 'user';
+		const isAi = message.role === 'ai';
+		const label = isUser ? 'Вы' : isAi ? 'ИИ' : 'Ассистент';
+		const bubbleClasses = cn(
+			'rounded-3xl px-4 py-3 max-w-2xl shadow-sm border',
+			isUser && 'bg-primary text-primary-foreground border-primary/20 ml-auto',
+			!isUser && isAi && 'bg-emerald-50 border-emerald-200 text-emerald-900',
+			!isUser && !isAi && 'bg-white border-border/60'
+		);
+
+		return (
+			<div className={cn('flex flex-col gap-2', isUser ? 'items-end' : 'items-start')} key={message.id}>
+				<div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+					<span>{label}</span>
+					<span>•</span>
+					<span>{new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+				</div>
+				<div className={bubbleClasses}>
+					<p className="text-base leading-relaxed whitespace-pre-wrap">{message.text}</p>
+					{message.highlights && message.highlights.length > 0 && (
+						<div className="mt-3 space-y-2">
+							{message.highlights.map((benefit) => (
+								<div key={benefit.id} className="rounded-2xl bg-white/80 border border-border/70 p-3 text-sm">
+									<p className="font-semibold">{benefit.title}</p>
+									<p className="text-muted-foreground text-sm">{benefit.description}</p>
+									<div className="mt-2 flex items-center justify-between">
+										{benefit.savingsPerMonth && <span className="text-primary font-semibold">{formatCurrency(benefit.savingsPerMonth)}/мес</span>}
+										<Button variant="link" size="sm" asChild className="px-0">
+											<Link to={`/benefits/${benefit.id}`}>Подробнее</Link>
+										</Button>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+			</div>
+		);
+	};
+
 	return (
 		<Layout title="Чат-бот Рука помощи">
-			<div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+			<div className="grid gap-6 lg:grid-cols-[2fr,1fr] pb-16 md:pb-24">
 				<section className="rounded-3xl border border-border/80 bg-white p-4 md:p-6 flex flex-col">
 					<div className="flex items-center gap-3 mb-4">
-						<div className="rounded-2xl bg-primary/10 p-3 text-primary">
+						<div className="rounded-full bg-primary/10 p-3 text-primary border border-primary/20">
 							<MessageCircle className="w-6 h-6" />
 						</div>
-						<div>
-							<p className="text-xl font-semibold">Ассистент всегда рядом</p>
-							<p className="text-sm text-muted-foreground">Ответы строятся на ваших данных и регионе.</p>
+						<div className="flex-1 min-w-0">
+							<p className="text-xl font-semibold leading-tight">Живой чат с ассистентом</p>
+							<p className="text-sm text-muted-foreground">Вопросы о льготах, документах и сроках — отвечаем прямо здесь.</p>
 						</div>
-						<div className="ml-auto">
+						<div className="flex flex-col items-end gap-1">
 							<Button
 								type="button"
 								variant={aiEnabled ? 'accent' : 'outline'}
@@ -299,84 +351,54 @@ export const ChatBotPage = () => {
 								onClick={() => setAiEnabled((prev) => !prev)}
 							>
 								<BrainCircuit className="w-4 h-4" />
-								ИИ-подсказки {aiEnabled ? 'вкл' : 'выкл'}
+								ИИ {aiEnabled ? 'включён' : 'выключен'}
 							</Button>
-							<p className="text-[11px] text-muted-foreground text-right mt-1">
-								Язык: {detectingLang ? 'определяем...' : lastDetectedLang === 'en' ? 'English' : 'Русский'}
-							</p>
+							<p className="text-[11px] text-muted-foreground">Язык: {detectingLang ? 'определяем…' : lastDetectedLang === 'en' ? 'English' : 'Русский'}</p>
 						</div>
 					</div>
 
-					<div ref={scrollRef} className="flex-1 overflow-y-auto space-y-4 pr-1">
-						{messages.map((message) => (
-							<div
-								key={message.id}
-								className={cn(
-									'rounded-3xl border px-4 py-3 max-w-2xl',
-									message.role === 'assistant'
-										? 'bg-primary/5 border-primary/20 text-slate-900'
-										: message.role === 'ai'
-											? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-											: 'bg-white border-border/70 self-end ml-auto shadow-sm'
-								)}
-							>
-								{message.role === 'ai' && (
-									<p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700 mb-1">ИИ-ответ</p>
-								)}
-								<p className="text-base leading-relaxed">{message.text}</p>
-								<p className="mt-2 text-xs text-muted-foreground">{new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</p>
-								{message.highlights && message.highlights.length > 0 && (
-									<div className="mt-4 space-y-3">
-										{message.highlights.map((benefit) => (
-											<Card key={benefit.id} className="rounded-2xl border border-border/70">
-												<CardContent className="pt-4">
-													<p className="text-base font-semibold">{benefit.title}</p>
-													<p className="text-sm text-muted-foreground">{benefit.description}</p>
-													<div className="mt-3 flex items-center justify-between text-sm">
-														{benefit.savingsPerMonth && (
-															<span className="text-primary font-semibold">{formatCurrency(benefit.savingsPerMonth)}/мес</span>
-														)}
-														<Button variant="link" size="sm" asChild className="px-0">
-															<Link to={`/benefits/${benefit.id}`}>Подробнее</Link>
-														</Button>
-													</div>
-												</CardContent>
-											</Card>
-										))}
-									</div>
-								)}
-							</div>
-						))}
-					</div>
-
-					<form onSubmit={handleSend} className="mt-4 space-y-3">
-						<textarea
-							value={input}
-							onChange={(e) => setInput(e.target.value)}
-							placeholder="Например: какие скидки на лекарства в моём регионе"
-							className="w-full rounded-3xl border-2 border-input bg-background px-4 py-3 text-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-							rows={2}
-						></textarea>
-						<div className="flex flex-wrap items-center gap-3">
-							<Button type="submit" variant="accent" size="lg" className="flex items-center gap-2">
-								<Send className="w-5 h-5" />
-								Отправить
-							</Button>
-							<div className="flex flex-wrap gap-2">
-								{quickPrompts.map((prompt) => (
-									<Button
-										key={prompt}
-										type="button"
-										variant="outline"
-										size="sm"
-										onClick={() => sendMessage(prompt)}
-									>
-										{prompt}
-									</Button>
-								))}
-							</div>
+					<div className="flex-1 rounded-2xl border border-border/60 bg-gradient-to-b from-slate-50 to-white p-3 md:p-4 flex flex-col gap-3">
+						<div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
+							<span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+							<span>На связи</span>
+							<span>•</span>
+							<span>Ответы учитывают ваш профиль</span>
 						</div>
-					</form>
+						<div ref={scrollRef} className="flex-1 overflow-y-auto space-y-4 pr-1">
+							{messages.map(renderBubble)}
+						</div>
+						<form onSubmit={handleSend} className="rounded-2xl border border-border/70 bg-white shadow-sm p-3 space-y-3">
+							<label className="flex flex-col gap-2 text-sm text-muted-foreground">
+								<span>Ваш вопрос</span>
+								<textarea
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder="Например: какие скидки на лекарства в моём регионе"
+									className="w-full rounded-2xl border-2 border-input bg-background px-4 py-3 text-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									rows={2}
+								></textarea>
+							</label>
+							<div className="flex flex-wrap items-center gap-2">
+								<Button type="submit" variant="accent" size="lg" className="flex items-center gap-2">
+									<Send className="w-5 h-5" />
+									Отправить
+								</Button>
+								<div className="flex flex-wrap gap-2">
+									{quickPrompts.map((prompt) => (
+										<Button
+											key={prompt}
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() => sendMessage(prompt)}
+										>
+											{prompt}
+										</Button>
+									))}
+								</div>
+							</div>
+						</form>
+					</div>
 				</section>
 
 				<aside className="space-y-4">

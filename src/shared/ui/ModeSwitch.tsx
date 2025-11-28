@@ -16,23 +16,21 @@ export const ModeSwitch = ({ className }: ModeSwitchProps) => {
 	const { user, setSimpleMode } = useAppStore();
 
 	const currentMode: Mode = useMemo<Mode>(() => {
+		if (user?.simpleModeEnabled) return 'simple';
 		return location.pathname.startsWith('/simple') ? 'simple' : 'main';
-	}, [location.pathname]);
-
-	const simpleAllowed = user?.simpleModeEnabled !== false;
+	}, [location.pathname, user?.simpleModeEnabled]);
 
 	const handleSelect = (mode: Mode) => {
 		if (mode === currentMode) return;
 
 		if (mode === 'simple') {
-			if (!simpleAllowed) {
-				setSimpleMode(true);
-			}
-			navigate('/simple');
+			setSimpleMode(true);
+			navigate('/benefits');
 			return;
 		}
 
 		if (mode === 'main') {
+			setSimpleMode(false);
 			navigate('/dashboard');
 		}
 	};
@@ -69,17 +67,11 @@ export const ModeSwitch = ({ className }: ModeSwitchProps) => {
 					buttonBase,
 					currentMode === 'simple'
 						? 'bg-accent text-accent-foreground shadow-md'
-						: 'text-muted-foreground hover:text-accent hover:bg-accent/5',
-					!simpleAllowed && 'cursor-not-allowed opacity-50'
+						: 'text-muted-foreground hover:text-accent hover:bg-accent/5'
 				)}
 				aria-pressed={currentMode === 'simple'}
-				onClick={() => simpleAllowed && handleSelect('simple')}
-				title={
-					simpleAllowed
-						? 'Перейти в упрощённый режим'
-						: 'В профиле можно включить упрощённый режим'
-				}
-				disabled={!simpleAllowed && currentMode !== 'simple'}
+				onClick={() => handleSelect('simple')}
+				title="Перейти в упрощённый режим"
 			>
 				<HandHelping className="w-4 h-4" />
 				<span>Простой</span>
