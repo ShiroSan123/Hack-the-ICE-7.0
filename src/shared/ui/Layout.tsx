@@ -87,20 +87,20 @@ export const Layout = ({ children, title }: LayoutProps) => {
 		<div className="min-h-screen min-h-dvh bg-slate-50 text-foreground flex flex-col">
 			<header className="no-print sticky top-0 z-50 border-b border-border/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 safe-area-top">
 				<div className="bg-gradient-to-r from-primary/15 via-accent/10 to-transparent border-b border-primary/20">
-					<div className="app-shell py-2 text-sm text-primary flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-						<p className="font-semibold">Социальный навигатор для помощи льготникам</p>
-						<div className="flex flex-wrap gap-4 text-primary/80 items-center">
-							<span>Горячая линия: 122</span>
-							<span>Регион: {user?.region || 'xxxxxxxxx'}</span>
-							{categoryLabel && <span>Категория: {categoryLabel}</span>}
+					<div className="app-shell py-1.5 text-sm text-primary flex flex-col gap-1.5 md:flex-row md:items-center md:justify-between">
+						<p className="font-semibold text-[13px] md:text-sm">Рука помощи — льготы рядом</p>
+						<div className="flex flex-wrap gap-3 text-primary/80 items-center text-[12px] md:text-sm">
+							<span className="font-semibold">122</span>
+							<span className="hidden sm:inline">Регион: {user?.region || 'xxxxxxxxx'}</span>
+							{categoryLabel && <span className="hidden sm:inline">Категория: {categoryLabel}</span>}
 							<div className="flex flex-wrap gap-2">
-								<span className="rounded-full bg-white/80 border border-primary/30 px-3 py-1 text-xs font-semibold text-primary">
+								<span className="rounded-full bg-white/80 border border-primary/30 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
 									Новых: {newCount}
 								</span>
-								<span className="rounded-full bg-amber-50 border border-amber-300 px-3 py-1 text-xs font-semibold text-amber-700 motion-safe:animate-pulse">
+								<span className="rounded-full bg-amber-50 border border-amber-300 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 motion-safe:animate-pulse">
 									Срочно: {urgentCount}
 								</span>
-								<span className="rounded-full bg-emerald-50 border border-emerald-300 px-3 py-1 text-xs font-semibold text-emerald-700">
+								<span className="rounded-full bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
 									Лекарства: {medsCount}
 								</span>
 							</div>
@@ -126,7 +126,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 							</div>
 						</Link>
 
-						<nav className="hidden lg:flex items-center gap-2 flex-1">
+				<nav className="hidden lg:flex items-center gap-2 flex-1">
 							{navigation.map((item) => {
 								const active = isLinkActive(item.match);
 								return (
@@ -203,7 +203,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
 				)}
 			</header>
 
-			<main className="app-shell flex-1 w-full py-8 md:py-10">
+			<main className="app-shell flex-1 w-full py-8 md:py-10 pb-24 md:pb-12">
 				{title && (
 					<div className="mb-8 space-y-2">
 						<p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Рука помощи</p>
