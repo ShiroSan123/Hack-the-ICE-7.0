@@ -94,43 +94,68 @@ const QrSupportScanner = () => {
 		setHint('Ищем камеру и наводим на QR-код...');
 
 		try {
-			const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-			const preferred = devices.find((device) => {
-				const label = device.label.toLowerCase();
-				return label.includes('back') || label.includes('rear');
-			});
-			const deviceId = (preferred ?? devices[0])?.deviceId;
+			const constraints: MediaStreamConstraints = {
+				video: {
+					facingMode: { ideal: 'environment' },
+					width: { ideal: 1280 },
+					height: { ideal: 720 },
+				},
+				audio: false,
+			};
 
-			if (!deviceId) {
-				throw new Error('Камера не найдена. Подключите устройство и попробуйте снова.');
+			const stream =
+				(await navigator.mediaDevices
+					.getUserMedia(constraints)
+					.catch(() => navigator.mediaDevices.getUserMedia({ video: true, audio: false }))) || null;
+
+			const handleResult = (result: any, decodeError: any, ctrl?: IScannerControls | null) => {
+				if (result) {
+					setRawResult(result.getText());
+					setHint('QR-код считан. Можно остановить камеру.');
+					setStatus('idle');
+					ctrl?.stop();
+					controlsRef.current = null;
+					return;
+				}
+
+				if (decodeError && !(decodeError instanceof NotFoundException)) {
+					setError('Не удалось расшифровать QR. Попробуйте поднести камеру ближе.');
+				}
+			};
+
+			let controls: IScannerControls | undefined | null;
+
+			if (stream && videoRef.current) {
+				videoRef.current.srcObject = stream;
+				videoRef.current.setAttribute('playsinline', 'true');
+				await videoRef.current.play().catch(() => undefined);
+				controls = await scanner.decodeFromStream(stream, videoRef.current, handleResult);
+			} else {
+				const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+				const preferred = devices.find((device) => {
+					const label = (device.label || '').toLowerCase();
+					return label.includes('back') || label.includes('rear');
+				});
+				const deviceId = (preferred ?? devices[0])?.deviceId;
+
+				if (deviceId) {
+					controls = await scanner.decodeFromVideoDevice(deviceId, videoRef.current, handleResult);
+				} else {
+					controls = await scanner.decodeFromConstraints({ video: true }, videoRef.current, handleResult);
+				}
 			}
 
-			const controls = await scanner.decodeFromVideoDevice(
-				deviceId,
-				videoRef.current,
-				(result, decodeError, ctrl) => {
-					if (result) {
-						setRawResult(result.getText());
-						setHint('QR-код считан. Можно остановить камеру.');
-						setStatus('idle');
-						ctrl?.stop();
-						controlsRef.current = null;
-						return;
-					}
+			if (!controls) {
+				throw new Error('Не удалось запустить видеопоток. Разрешите доступ к камере.');
+			}
 
-					if (decodeError && !(decodeError instanceof NotFoundException)) {
-						setError('Не удалось расшифровать QR. Попробуйте поднести камеру ближе.');
-					}
-				}
-			);
-
-			controlsRef.current = controls ?? null;
+			controlsRef.current = controls;
 			setHint('Держите памятку ровно, камера ищет QR...');
 		} catch (err) {
 			const message =
 				err instanceof Error
 					? err.message
-					: 'Не получилось запустить камеру. Попробуйте обновить страницу.';
+					: 'Не получилось запустить камеру. Проверьте разрешения и попробуйте снова.';
 			setError(message);
 			setStatus('idle');
 			setHint('Попробуйте снова или загрузите фото QR-кода.');
