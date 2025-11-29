@@ -30,6 +30,16 @@ export interface Benefit {
 	steps: string[];
 	documents: string[];
 	partner?: string;
+	categoryId?: string;
+	tags?: string[];
+	merchantName?: string;
+	merchantUrl?: string;
+	locations?: Array<{
+		city?: string;
+		address?: string;
+		lat?: number;
+		lon?: number;
+	}>;
 	amount?: number;
 	savingsPerMonth?: number;
 	isNew?: boolean;

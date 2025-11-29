@@ -23,6 +23,7 @@ import { useTTS } from '@/shared/lib/useTTS';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { normalizeTargetGroup } from '@/shared/lib/targetGroups';
 import { PriorityStack, PriorityCardData } from './PriorityStack';
+import QrSupportScanner from './QrSupportScanner';
 
 export const LifeFeedPage = () => {
 	const {
@@ -444,13 +445,16 @@ export const LifeFeedPage = () => {
 						</CardContent>
 					</Card>
 
-					<Card>
+				</div>
+
+				<div className="grid gap-6 lg:grid-cols-2">
+					<Card className="h-full">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Headset className="w-6 h-6 text-primary" />
 								Поддержка рядом
 							</CardTitle>
-							<CardDescription>Канал связи и быстрые действия.</CardDescription>
+							<CardDescription>Канал связи и быстрые действия. Рядом можно считать QR из распечатки.</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="rounded-2xl border border-primary/20 bg-primary/5 p-3">
@@ -468,6 +472,8 @@ export const LifeFeedPage = () => {
 							</Button>
 						</CardContent>
 					</Card>
+
+					<QrSupportScanner />
 				</div>
 			</div>
 		</Layout>

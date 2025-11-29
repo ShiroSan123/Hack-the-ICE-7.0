@@ -146,6 +146,14 @@ export const PrintView = () => {
 	const qrBrandLabel = parsedQrPayload?.brand ?? '—';
 
 	const buildReportPayload = useCallback(() => {
+		const currentYear = new Date().getFullYear();
+		const profileAge =
+			typeof user?.birthYear === 'number' &&
+			user.birthYear >= 1900 &&
+			user.birthYear <= currentYear
+				? currentYear - user.birthYear
+				: null;
+
 		const benefitsReport = userBenefits.map((benefit) => ({
 			id: benefit.id,
 			title: benefit.title,
@@ -183,6 +191,8 @@ export const PrintView = () => {
 				name: user?.name ?? 'Пользователь',
 				region: user?.region ?? '—',
 				category: user?.category ?? '—',
+				birthYear: user?.birthYear ?? null,
+				age: profileAge,
 			},
 			stats: {
 				benefitsCount: userBenefits.length,

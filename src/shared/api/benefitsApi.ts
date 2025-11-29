@@ -1,6 +1,6 @@
 import { supabase } from '@/shared/lib/supabaseClient';
 import { calculateDaysUntil } from '@/shared/lib/formatters';
-import { normalizeTargetGroups } from '@/shared/lib/targetGroups';
+import { normalizeTargetGroup, normalizeTargetGroups } from '@/shared/lib/targetGroups';
 import { Benefit, UserProfile } from '../types';
 
 type BenefitRow = {
@@ -18,6 +18,11 @@ type BenefitRow = {
 	partner: string | null;
 	savings_per_month: number | null;
 	is_new: boolean | null;
+	category_id?: string | null;
+	tags?: string[] | null;
+	merchant_name?: string | null;
+	merchant_url?: string | null;
+	locations?: unknown;
 };
 
 const mapRowToBenefit = (row: BenefitRow): Benefit => ({
@@ -35,6 +40,11 @@ const mapRowToBenefit = (row: BenefitRow): Benefit => ({
 	partner: row.partner ?? undefined,
 	savingsPerMonth: row.savings_per_month ?? undefined,
 	isNew: Boolean(row.is_new),
+	categoryId: row.category_id ?? undefined,
+	tags: row.tags ?? [],
+	merchantName: row.merchant_name ?? undefined,
+	merchantUrl: row.merchant_url ?? undefined,
+	locations: Array.isArray(row.locations) ? (row.locations as Benefit['locations']) : undefined,
 	expiresIn: row.valid_to ? calculateDaysUntil(row.valid_to) : undefined,
 });
 
@@ -45,16 +55,15 @@ const handleError = (error: unknown) => {
 	throw new Error('Failed to load benefits');
 };
 
-const buildProfileQuery = (profile?: UserProfile | null) => {
-	let query = supabase.from('benefits').select('*').order('title');
-	if (!profile) {
-		return query;
-	}
-
-	const regionFilter = profile.region || 'all';
-	query = query.contains('target_groups', [profile.category]);
-	query = query.or(`regions.cs.{${regionFilter}},regions.cs.{all}`);
-	return query;
+type MatchBenefitsParams = {
+	search?: string;
+	region?: string | null;
+	targetGroup?: string | null;
+	tags?: string[];
+	onlyNew?: boolean;
+	type?: string;
+	limit?: number;
+	offset?: number;
 };
 
 export const benefitsApi = {
@@ -78,10 +87,12 @@ export const benefitsApi = {
 	},
 
 	getForProfile: async (profile?: UserProfile | null): Promise<Benefit[]> => {
-		const query = buildProfileQuery(profile);
-		const { data, error } = await query;
-		if (error || !data) handleError(error);
-		return data.map((row) => mapRowToBenefit(row as BenefitRow));
+		const normalizedTargetGroup = normalizeTargetGroup(profile?.category) ?? null;
+		return benefitsApi.search({
+			region: profile?.region ?? null,
+			targetGroup: normalizedTargetGroup,
+			limit: 500,
+		});
 	},
 
 	filterByRegion: async (region: string): Promise<Benefit[]> => {
@@ -98,6 +109,22 @@ export const benefitsApi = {
 			.from('benefits')
 			.select('*')
 			.contains('target_groups', [targetGroup]);
+		if (error || !data) handleError(error);
+		return data.map((row) => mapRowToBenefit(row as BenefitRow));
+	},
+
+	search: async (params: MatchBenefitsParams): Promise<Benefit[]> => {
+		const { data, error } = await supabase.rpc('match_benefits', {
+			p_search: params.search?.trim() || null,
+			p_region: params.region ?? null,
+			p_target_group: params.targetGroup ?? null,
+			p_tags: params.tags && params.tags.length ? params.tags : null,
+			p_only_new: params.onlyNew ?? false,
+			p_type: params.type ?? null,
+			p_limit: params.limit ?? 200,
+			p_offset: params.offset ?? 0,
+		});
+
 		if (error || !data) handleError(error);
 		return data.map((row) => mapRowToBenefit(row as BenefitRow));
 	},

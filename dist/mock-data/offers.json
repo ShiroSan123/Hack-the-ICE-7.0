@@ -1,203 +1,267 @@
 [
 	{
-		"id": "offer-1",
-		"title": "Скидка 20% на продукты в сети xxxxxxxxx",
-		"description": "Постоянная скидка 20% на все продукты питания по социальной карте для пенсионеров.",
-		"partner": "Торговая сеть xxxxxxxxx",
-		"discount": 20,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Продукты"
-	},
-	{
-		"id": "offer-2",
-		"title": "Бесплатная доставка лекарств",
-		"description": "Бесплатная доставка лекарств на дом при заказе от 500 рублей.",
-		"partner": "Аптечная сеть xxxxxxxxx",
-		"discount": 100,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"disabled"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Медицина"
-	},
-	{
-		"id": "offer-3",
-		"title": "Скидка 15% на обувь и одежду",
-		"description": "Постоянная скидка 15% на всю обувь и одежду для пенсионеров и инвалидов.",
-		"partner": "Магазин Одежда+ xxxxxxxxx",
-		"discount": 15,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"disabled"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Одежда"
-	},
-	{
-		"id": "offer-4",
-		"title": "Скидка 30% на ремонт обуви",
-		"description": "Скидка 30% на все услуги по ремонту обуви для пенсионеров.",
-		"partner": "Мастерская Каблучок xxxxxxxxx",
-		"discount": 30,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-06-30",
-		"targetGroups": [
-			"pensioner"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Услуги"
-	},
-	{
-		"id": "offer-5",
-		"title": "Бесплатная консультация юриста",
-		"description": "Одна бесплатная консультация юриста в месяц для льготных категорий.",
-		"partner": "Юридическая служба xxxxxxxxx",
-		"discount": 100,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"disabled",
-			"veteran"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Юридические услуги"
-	},
-	{
-		"id": "offer-6",
-		"title": "Скидка 25% на медицинские анализы",
-		"description": "Скидка 25% на все виды лабораторных анализов в частной клинике.",
-		"partner": "Медицинский центр Здоровье xxxxxxxxx",
-		"discount": 25,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"veteran"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Медицина"
-	},
-	{
-		"id": "offer-7",
-		"title": "Бесплатная стрижка раз в месяц",
-		"description": "Одна бесплатная стрижка в месяц для пенсионеров старше 75 лет.",
-		"partner": "Парикмахерская Стиль xxxxxxxxx",
-		"discount": 100,
-		"validFrom": "2024-03-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Услуги"
-	},
-	{
-		"id": "offer-8",
-		"title": "Скидка 10% на услуги химчистки",
-		"description": "Постоянная скидка 10% на все услуги химчистки для льготных категорий.",
-		"partner": "Химчистка Чисто xxxxxxxxx",
-		"discount": 10,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"disabled",
-			"veteran"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Услуги"
-	},
-	{
-		"id": "offer-9",
-		"title": "Скидка 50% на массаж",
-		"description": "Скидка 50% на первый сеанс лечебного массажа в медицинском центре.",
-		"partner": "Центр реабилитации xxxxxxxxx",
+		"id": "offer_airline_yakutia_subsidized_tariffs_2025",
+		"title": "Субсидированные тарифы авиакомпании «Якутия» на 2025 год",
+		"description": "Специальные субсидированные тарифы авиакомпании «Якутия» по ряду направлений (Якутск–Москва, Якутск–Санкт‑Петербург и др.) для льготных категорий граждан и жителей ДФО в 2025 году.",
+		"partner": "airline_yakutia",
 		"discount": 50,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
+		"validFrom": "2025-01-01",
+		"validTo": "2025-12-31",
 		"targetGroups": [
+			"child",
 			"pensioner",
+			"disabled",
+			"large-family",
+			"low-income"
+		],
+		"regions": [
+			"yakutsk",
+			"sakha_republic"
+		],
+		"category": "transport"
+	},
+	{
+		"id": "offer_pharmacy_pensioners_10_percent_weekdays",
+		"title": "Скидка 10 % пенсионерам в будни",
+		"description": "Типовая скидка 10 % на лекарства и товары аптечного ассортимента по пенсионному удостоверению в большинстве городских аптек Якутска (действует в будние дни).",
+		"partner": "local_pharmacies_generic",
+		"discount": 10,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"yakutsk"
+		],
+		"category": "pharmacy"
+	},
+	{
+		"id": "offer_pharmacy_many_children_family_5_percent",
+		"title": "Скидка 5 % для многодетных семей в аптеках",
+		"description": "Партнёрская скидка около 5 % на медикаменты и детские товары при предъявлении удостоверения многодетной семьи в ряде аптечных сетей Якутска.",
+		"partner": "local_pharmacies_generic",
+		"discount": 5,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"large-family"
+		],
+		"regions": [
+			"yakutsk"
+		],
+		"category": "pharmacy"
+	},
+	{
+		"id": "offer_city_transport_card_young_resident_yakutia",
+		"title": "Карта юного жителя Якутии / карта жителя Якутии",
+		"description": "Транспортные приложения единого цифрового сервиса для школьников с бесплатным или льготным проездом на городском и пригородном транспорте при оплате картой.",
+		"partner": "yakutia_transport_operators",
+		"discount": 100,
+		"validFrom": "2025-09-01",
+		"validTo": null,
+		"targetGroups": [
+			"large-family"
+		],
+		"regions": [
+			"yakutsk",
+			"sakha_republic"
+		],
+		"category": "transport"
+	},
+	{
+		"id": "offer_bank_mortgage_discount_yakutsk_teachers_doctors",
+		"title": "Спецусловия ипотеки для учителей, врачей и молодых семей",
+		"description": "Сниженная процентная ставка по ипотеке и специальные условия кредитования в Якутске для учителей, врачей и молодых семей.",
+		"partner": "local_banks_generic",
+		"discount": 3,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"low-income",
+			"large-family"
+		],
+		"regions": [
+			"yakutsk"
+		],
+		"category": "mortgage"
+	},
+	{
+		"id": "offer_city_museums_free_day_many_children",
+		"title": "Бесплатное посещение музеев и парков для многодетных",
+		"description": "Бесплатный вход один день в месяц для многодетных семей и их детей в музеи, парки культуры и выставки Якутска.",
+		"partner": "yakutsk_city_culture",
+		"discount": 100,
+		"validFrom": "2020-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"large-family"
+		],
+		"regions": [
+			"yakutsk"
+		],
+		"category": "culture"
+	},
+	{
+		"id": "offer_jkh_discount_pensioner_2025",
+		"title": "Скидка 50% на услуги ЖКХ для пенсионеров",
+		"description": "Пенсионерам оплачивают половину стоимости коммунальных услуг — в ряде регионов по специальным программам.",
+		"partner": "local_government",
+		"discount": 50,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"russia"
+		],
+		"category": "utilities"
+	},
+	{
+		"id": "offer_transport_free_child_2025",
+		"title": "Бесплатный транспорт для детей до 5 лет",
+		"description": "Дети до 5 лет ездят на поездах бесплатно, с 5 до 10 — со скидкой 50%.",
+		"partner": "rzd",
+		"discount": 100,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"child"
+		],
+		"regions": [
+			"russia"
+		],
+		"category": "transport"
+	},
+	{
+		"id": "offer_moscow_school_food_2025",
+		"title": "Бесплатное горячее питание в школах Москвы для всех младших классов",
+		"description": "Все ученики младших классов государственных школ Москвы получают бесплатные завтраки и обеды.",
+		"partner": "moscow",
+		"discount": 100,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"child"
+		],
+		"regions": [
+			"moscow"
+		],
+		"category": "education"
+	},
+	{
+		"id": "offer_air_discount_large_family_2025",
+		"title": "Субсидированные авиабилеты для многодетных семей",
+		"description": "В ряде регионов ДФО детям и многодетным семьям предоставляются авиабилеты со скидкой 50%.",
+		"partner": "airlines",
+		"discount": 50,
+		"validFrom": "2025-01-01",
+		"validTo": "2025-12-31",
+		"targetGroups": [
+			"large-family",
+			"child"
+		],
+		"regions": [
+			"far_east"
+		],
+		"category": "transport"
+	},
+	{
+		"id": "offer_property_tax_writeoff_pensioner_2025",
+		"title": "Освобождение от налога на имущество для пенсионеров",
+		"description": "Пенсионеры не платят налог на одну квартиру, дом или гараж.",
+		"partner": "nalogovaya",
+		"discount": 100,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"pensioner"
+		],
+		"regions": [
+			"russia"
+		],
+		"category": "tax"
+	},
+	{
+		"id": "offer_transport_free_disability_2025",
+		"title": "Бесплатный пригородный транспорт для инвалидов",
+		"description": "Бесплатный проезд на пригородных автобусах, электричках, метро для инвалидов всех групп.",
+		"partner": "rzd",
+		"discount": 100,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
 			"disabled"
 		],
 		"regions": [
-			"xxxxxxxxx"
+			"russia"
 		],
-		"category": "Медицина"
+		"category": "transport"
 	},
 	{
-		"id": "offer-10",
-		"title": "Бесплатные курсы компьютерной грамотности",
-		"description": "Бесплатное обучение работе с компьютером и интернетом для пенсионеров.",
-		"partner": "Библиотека им. Ленина xxxxxxxxx",
+		"id": "offer_parking_free_disabled_2025",
+		"title": "Бесплатная парковка для автомобилей инвалидов",
+		"description": "Бесплатная парковка на всей территории РФ для транспортных средств инвалидов.",
+		"partner": null,
 		"discount": 100,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
+		"validFrom": "2025-01-01",
+		"validTo": null,
 		"targetGroups": [
-			"pensioner"
+			"disabled"
 		],
 		"regions": [
-			"xxxxxxxxx"
+			"russia"
 		],
-		"category": "Образование"
+		"category": "transport"
 	},
 	{
-		"id": "offer-11",
-		"title": "Скидка 15% на товары для дома",
-		"description": "Постоянная скидка 15% на товары для дома и бытовую химию.",
-		"partner": "Магазин Всё для дома xxxxxxxxx",
-		"discount": 15,
-		"validFrom": "2024-01-01",
-		"validTo": "2024-12-31",
-		"targetGroups": [
-			"pensioner",
-			"veteran"
-		],
-		"regions": [
-			"xxxxxxxxx"
-		],
-		"category": "Товары для дома"
-	},
-	{
-		"id": "offer-12",
-		"title": "Бесплатные занятия йогой",
-		"description": "Два бесплатных занятия йогой в неделю для пенсионеров в парке.",
-		"partner": "Спортивный клуб Здоровье xxxxxxxxx",
+		"id": "offer_dispensary_leave_predpensioner_2025",
+		"title": "Оплачиваемые дни для диспансеризации предпенсионеров",
+		"description": "2 дополнительных оплачиваемых выходных дня в год для прохождения медицинского обследования.",
+		"partner": null,
 		"discount": 100,
-		"validFrom": "2024-04-01",
-		"validTo": "2024-10-31",
+		"validFrom": "2025-01-01",
+		"validTo": null,
 		"targetGroups": [
-			"pensioner"
+			"predpensioner"
 		],
 		"regions": [
-			"xxxxxxxxx"
+			"russia"
 		],
-		"category": "Спорт"
+		"category": "employment"
+	},
+	{
+		"id": "offer_jkh_discount_invalide_2025",
+		"title": "Скидка 50% на оплату коммунальных услуг для инвалидов",
+		"description": "Инвалиды всех групп, а также семьи с детьми-инвалидами оплачивают ЖКУ со скидкой.",
+		"partner": "local_government",
+		"discount": 50,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"disabled",
+			"child"
+		],
+		"regions": [
+			"russia"
+		],
+		"category": "utilities"
+	},
+	{
+		"id": "offer_notary_fee_discount_disabled_2025",
+		"title": "Скидка на оплату услуг нотариуса для инвалидов",
+		"description": "Инвалиды освобождены от оплаты части услуг нотариуса при оформлении жилья, наследства, завещания.",
+		"partner": "notary_chamber",
+		"discount": 100,
+		"validFrom": "2025-01-01",
+		"validTo": null,
+		"targetGroups": [
+			"disabled"
+		],
+		"regions": [
+			"russia"
+		],
+		"category": "legal"
 	}
 ]

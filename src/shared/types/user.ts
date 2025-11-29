@@ -14,4 +14,13 @@ export interface UserProfile {
 	role: UserRole;
 	simpleModeEnabled?: boolean;
 	name?: string;
+	birthYear?: number;
+	employmentStatus?: string;
+	student?: boolean;
+	pensioner?: boolean;
+	veteran?: boolean;
+	hasChildren?: boolean;
+	disabilityGroup?: string;
+	incomeBand?: string;
+	city?: string;
 }

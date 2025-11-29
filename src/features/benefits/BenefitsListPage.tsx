@@ -16,24 +16,40 @@ export const BenefitsListPage = () => {
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedType, setSelectedType] = useState('all');
+	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
 
 	useEffect(() => {
 		setLoading(true);
-		const loadBenefits = async () => {
+		let cancelled = false;
+		const timeout = setTimeout(async () => {
 			try {
-				const data = await benefitsApi.getForProfile(user);
-				setBenefits(data);
+				const data = await benefitsApi.search({
+					search: searchQuery || undefined,
+					region: user?.region ?? null,
+					targetGroup: normalizedUserCategory,
+					type: selectedType === 'all' ? null : selectedType,
+					limit: 300,
+				});
+
+				if (!cancelled) {
+					setBenefits(data);
+				}
 			} catch (error) {
-				console.error('Failed to load benefits:', error);
+				if (!cancelled) {
+					console.error('Failed to load benefits:', error);
+				}
 			} finally {
-				setLoading(false);
+				if (!cancelled) {
+					setLoading(false);
+				}
 			}
+		}, 250);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timeout);
 		};
-
-		loadBenefits();
-	}, [setBenefits, user]);
-
-	const normalizedUserCategory = user ? normalizeTargetGroup(user.category) : null;
+	}, [normalizedUserCategory, searchQuery, selectedType, setBenefits, user]);
 
 	const accessibleBenefits = useMemo(() => {
 		if (!user) return benefits;
