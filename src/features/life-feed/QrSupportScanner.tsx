@@ -85,7 +85,15 @@ const QrSupportScanner = () => {
 	};
 
 	const startCamera = async () => {
-		if (!videoRef.current) return;
+		if (!videoRef.current) {
+			setError('Видеоэлемент не готов. Обновите страницу и попробуйте снова.');
+			return;
+		}
+
+		if (!navigator.mediaDevices?.getUserMedia) {
+			setError('Браузер не поддерживает работу с камерой. Откройте в мобильном Chrome/Safari.');
+			return;
+		}
 
 		stopCamera();
 		setStatus('scanning');
@@ -103,6 +111,7 @@ const QrSupportScanner = () => {
 				audio: false,
 			};
 
+			// Явно запрашиваем доступ: на iOS список устройств пуст без этого
 			const stream =
 				(await navigator.mediaDevices
 					.getUserMedia(constraints)
@@ -126,8 +135,10 @@ const QrSupportScanner = () => {
 			let controls: IScannerControls | undefined | null;
 
 			if (stream && videoRef.current) {
+				// Важно для Safari: playsInline и прямое назначение stream
 				videoRef.current.srcObject = stream;
 				videoRef.current.setAttribute('playsinline', 'true');
+				videoRef.current.setAttribute('muted', 'true');
 				await videoRef.current.play().catch(() => undefined);
 				controls = await scanner.decodeFromStream(stream, videoRef.current, handleResult);
 			} else {
@@ -141,7 +152,8 @@ const QrSupportScanner = () => {
 				if (deviceId) {
 					controls = await scanner.decodeFromVideoDevice(deviceId, videoRef.current, handleResult);
 				} else {
-					controls = await scanner.decodeFromConstraints({ video: true }, videoRef.current, handleResult);
+					// Без stream и списка устройств — просим любой доступный видеоинпут
+					controls = await scanner.decodeFromConstraints({ video: true, audio: false }, videoRef.current, handleResult);
 				}
 			}
 
