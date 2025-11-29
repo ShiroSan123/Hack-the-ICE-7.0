@@ -180,6 +180,31 @@
 	}
 }
 
+@media (max-width: 640px) {
+	body {
+		font-size: 1.05rem;
+		line-height: 1.55;
+	}
+
+	:root {
+		--page-inline-padding: max(0.75rem, 3vw);
+	}
+
+	.app-shell {
+		padding-left: calc(var(--page-inline-padding) + var(--safe-area-left));
+		padding-right: calc(var(--page-inline-padding) + var(--safe-area-right));
+	}
+
+	.print-friendly {
+		border-radius: 1rem;
+	}
+
+	.print-friendly img {
+		max-width: 100%;
+		height: auto;
+	}
+}
+
 @media print {
 	body {
 		background: white;

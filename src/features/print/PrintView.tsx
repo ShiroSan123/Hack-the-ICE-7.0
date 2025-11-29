@@ -66,6 +66,7 @@ export const PrintView = () => {
 	const [qrResult, setQrResult] = useState<PrintQrResult | null>(null);
 	const [qrLoading, setQrLoading] = useState(false);
 	const [qrError, setQrError] = useState<string | null>(null);
+	const hasQr = Boolean(qrResult?.qr?.dataUrl);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const autoRequestedRef = useRef<string | null>(null);
 	const normalizedAutoPhone = useMemo(() => {
@@ -271,22 +272,23 @@ export const PrintView = () => {
 		void generateQr(normalizedAutoPhone);
 	}, [normalizedAutoPhone, qrLoading, generateQr]);
 
-const handleDownloadPdf = async () => {
-	if (!contentRef.current) return;
-	setDownloading(true);
-	try {
-		const [{ default: html2canvas }, { default: JsPDF }] = await Promise.all([
-			import('html2canvas'),
-			import('jspdf'),
-		]);
+	const handleDownloadPdf = async () => {
+		if (!contentRef.current) return;
+		setDownloading(true);
+		try {
+			const [{ default: html2canvas }, { default: JsPDF }] = await Promise.all([
+				import('html2canvas'),
+				import('jspdf'),
+			]);
 
-		const canvas = await html2canvas(contentRef.current, {
-			scale: 2,
-			useCORS: true,
-			scrollY: -window.scrollY,
-		});
-		const imgData = canvas.toDataURL('image/png');
-		const pdf = new JsPDF('p', 'mm', 'a4');
+			const canvas = await html2canvas(contentRef.current, {
+				scale: 2,
+				useCORS: true,
+				scrollY: -window.scrollY,
+				backgroundColor: '#ffffff',
+			});
+			const imgData = canvas.toDataURL('image/png');
+			const pdf = new JsPDF('p', 'mm', 'a4');
 			const pdfWidth = pdf.internal.pageSize.getWidth();
 			const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 			const pageHeight = pdf.internal.pageSize.getHeight();
@@ -337,24 +339,35 @@ const handleDownloadPdf = async () => {
 
 
 	return (
-		<div className="min-h-screen bg-background safe-area-top safe-area-bottom">
-			<div className="no-print sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-				<div className="app-shell py-4 flex flex-wrap items-center justify-between gap-2">
-					<Button variant="ghost" size="lg" onClick={() => navigate(-1)}>
+		<div className="min-h-screen bg-background safe-area-top safe-area-bottom pb-8 md:pb-12">
+			<div className="no-print sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border shadow-sm">
+				<div className="app-shell py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<Button
+						variant="ghost"
+						size="lg"
+						className="w-full sm:w-auto justify-start"
+						onClick={() => navigate(-1)}
+					>
 						<ArrowLeft className="w-5 h-5 mr-2" />
 						Назад
 					</Button>
-					<div className="flex flex-wrap gap-2">
+					<div className="flex flex-wrap gap-2 w-full sm:w-auto">
 						<Button
 							variant="outline"
 							size="lg"
+							className="flex-1 min-w-[150px] sm:flex-none"
 							onClick={handleDownloadPdf}
 							disabled={downloading}
 						>
 							<Download className="w-5 h-5 mr-2" />
 							{downloading ? 'Формируем...' : 'Скачать PDF'}
 						</Button>
-						<Button variant="accent" size="lg" onClick={handlePrint}>
+						<Button
+							variant="accent"
+							size="lg"
+							className="flex-1 min-w-[150px] sm:flex-none"
+							onClick={handlePrint}
+						>
 							<Printer className="w-5 h-5 mr-2" />
 							Печать
 						</Button>
@@ -363,24 +376,27 @@ const handleDownloadPdf = async () => {
 			</div>
 
 			{ready && (
-				<div ref={contentRef} className="app-shell max-w-5xl py-8 space-y-8">
-					<section className="print-friendly rounded-3xl border border-border/80 bg-white p-6 shadow-sm">
-						<p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Персональная памятка</p>
-						<h1 className="text-3xl font-bold text-slate-900 mt-2">Мои льготы и лекарства</h1>
-						<div className="mt-4 grid gap-3 text-base text-muted-foreground md:grid-cols-2">
+				<div
+					ref={contentRef}
+					className="app-shell max-w-5xl py-6 md:py-8 pb-24 md:pb-12 space-y-6 md:space-y-8"
+				>
+					<section className="print-friendly rounded-3xl border border-border/80 bg-white p-4 sm:p-6 shadow-sm space-y-4">
+						<p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-muted-foreground">Персональная памятка</p>
+						<h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">Мои льготы и лекарства</h1>
+						<div className="grid gap-3 sm:gap-4 text-base text-muted-foreground md:grid-cols-2">
 							<p><span className="font-semibold text-foreground">Пользователь:</span> {user?.name || 'Пользователь'}</p>
 							<p><span className="font-semibold text-foreground">Регион:</span> {user?.region || '—'}</p>
 							<p><span className="font-semibold text-foreground">Категория:</span> {user?.category || '—'}</p>
 							<p><span className="font-semibold text-foreground">Дата формирования:</span> {printDate}</p>
 						</div>
 						{soonExpiring && (
-							<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+							<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 text-sm sm:text-base text-amber-800">
 								<strong>Важно:</strong> льгота «{soonExpiring.title}» истекает через {soonExpiring.expiresIn} дней. Проверьте документы.
 							</div>
 						)}
 					</section>
 
-					<section className="print-friendly rounded-3xl border border-primary/30 bg-white p-6 shadow-sm">
+					<section className="print-friendly rounded-3xl border border-primary/30 bg-white p-4 sm:p-6 shadow-sm space-y-4">
 						<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 							<div>
 								<p className="text-xs uppercase tracking-[0.3em] text-primary/80">QR для печати</p>
@@ -392,25 +408,26 @@ const handleDownloadPdf = async () => {
 								<span>Сканируется камерами и валидаторами</span>
 							</div>
 						</div>
-						<form onSubmit={handleGenerateQr} className="no-print mt-6 grid gap-4 md:grid-cols-[minmax(0,360px)_auto]">
-							<label className="space-y-2">
+						<form onSubmit={handleGenerateQr} className="no-print mt-6 grid gap-3 sm:gap-4 md:grid-cols-[minmax(0,360px)_auto]">
+							<label className="space-y-2 min-w-0">
 								<span className="text-sm font-medium text-muted-foreground">Номер телефона (формат E.164)</span>
 								<input
-									className="w-full rounded-2xl border border-border/70 bg-background px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+									className="w-full rounded-2xl border border-border/70 bg-background px-4 py-3 text-base sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 									type="tel"
 									placeholder="+79991234567"
 									value={qrPhone}
 									onChange={(event) => setQrPhone(event.target.value)}
 								/>
 							</label>
-							<div className="flex items-end gap-2">
-								<Button type="submit" size="lg" disabled={qrLoading || !qrPhone}>
+							<div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
+								<Button type="submit" size="lg" className="flex-1 sm:flex-none w-full sm:w-auto" disabled={qrLoading || !qrPhone}>
 									{qrLoading ? 'Создаём...' : 'Получить QR'}
 								</Button>
 								<Button
 									type="button"
 									variant="outline"
 									size="lg"
+									className="w-full sm:w-auto"
 									onClick={handlePrint}
 									disabled={!qrResult?.qr?.dataUrl}
 								>
@@ -426,17 +443,17 @@ const handleDownloadPdf = async () => {
 						)}
 
 						{qrResult?.qr?.dataUrl && (
-							<div className="mt-6 grid gap-6 lg:grid-cols-[260px,minmax(0,1fr)]">
-								<div className="rounded-3xl border border-border/70 bg-white p-4 text-center">
+							<div className="mt-6 grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+								<div className="rounded-3xl border border-border/70 bg-white p-4 sm:p-5 text-center w-full max-w-md mx-auto shadow-sm">
 									<img
 										src={qrResult.qr.dataUrl}
 										alt={`QR-код для ${qrResult.normalizedPhone}`}
-										className="w-full rounded-2xl border border-border object-contain"
+										className="w-full max-w-[320px] mx-auto rounded-2xl border border-border object-contain shadow-sm"
 									/>
 									<p className="mt-3 text-xs text-muted-foreground">Вставьте код в макет или распечатайте прямо отсюда.</p>
 								</div>
 								<div className="space-y-4">
-									<div className="grid gap-3 sm:grid-cols-2">
+									<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 min-w-0">
 										<div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
 											<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Телефон</p>
 											<p className="text-lg font-semibold">{qrResult.normalizedPhone}</p>
@@ -466,7 +483,7 @@ const handleDownloadPdf = async () => {
 									{qrPayloadText && (
 										<div>
 											<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Payload</p>
-											<pre className="mt-2 max-h-60 overflow-auto rounded-2xl border border-border/70 bg-slate-50 p-4 text-xs font-mono leading-5 text-slate-700">
+											<pre className="mt-2 max-h-60 overflow-auto rounded-2xl border border-border/70 bg-slate-50 p-4 text-[11px] sm:text-xs font-mono leading-5 text-slate-700 whitespace-pre-wrap break-words">
 												{qrPayloadText}
 											</pre>
 										</div>
@@ -485,9 +502,9 @@ const handleDownloadPdf = async () => {
 						)}
 					</section>
 
-					<section className="print-friendly grid gap-4 md:grid-cols-3">
+					<section className="print-friendly grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						{summaryCards.map((card) => (
-							<div key={card.label} className={`rounded-3xl border border-border/70 p-4 flex flex-col gap-2 ${card.accent}`}>
+							<div key={card.label} className={`rounded-3xl border border-border/70 p-4 sm:p-5 flex flex-col gap-2 ${card.accent}`}>
 								<div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em]">
 									<card.icon className="w-4 h-4" />
 									{card.label}
@@ -498,7 +515,7 @@ const handleDownloadPdf = async () => {
 						))}
 					</section>
 
-					<section className="print-friendly space-y-4">
+					<section className="print-friendly space-y-3 sm:space-y-4">
 						<div className="flex items-center gap-3">
 							<div className="rounded-2xl bg-primary/10 p-2 text-primary">
 								<ClipboardList className="w-5 h-5" />
@@ -515,7 +532,7 @@ const handleDownloadPdf = async () => {
 							</div>
 						) : (
 							userBenefits.map((benefit, idx) => (
-								<article key={benefit.id} className="print-friendly rounded-3xl border border-border/80 bg-white p-5 shadow-sm space-y-4">
+								<article key={benefit.id} className="print-friendly rounded-3xl border border-border/80 bg-white p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
 									<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
 										<div>
 											<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Льгота {idx + 1}</p>
@@ -529,7 +546,7 @@ const handleDownloadPdf = async () => {
 										)}
 									</div>
 
-									<div className="grid gap-3 md:grid-cols-3 text-sm">
+									<div className="grid gap-3 sm:gap-4 md:grid-cols-3 text-sm sm:text-base">
 										<div className="rounded-2xl border border-border/60 p-3">
 											<p className="text-muted-foreground">Срок действия</p>
 											<p className="font-semibold">{formatDate(benefit.validFrom)} — {formatDate(benefit.validTo)}</p>
@@ -544,7 +561,7 @@ const handleDownloadPdf = async () => {
 										</div>
 									</div>
 
-									<div className="grid gap-4 md:grid-cols-2">
+									<div className="grid gap-3 sm:gap-4 md:grid-cols-2">
 										<div>
 											<p className="font-semibold text-slate-900 flex items-center gap-2">
 												<ShieldCheck className="w-4 h-4" /> Требования
@@ -589,7 +606,7 @@ const handleDownloadPdf = async () => {
 					</section>
 
 					{medicines.length > 0 && (
-						<section className="print-friendly space-y-4">
+						<section className="print-friendly space-y-3 sm:space-y-4">
 							<div className="flex items-center gap-3">
 								<div className="rounded-2xl bg-primary/10 p-2 text-primary">
 									<Pill className="w-5 h-5" />
@@ -601,7 +618,7 @@ const handleDownloadPdf = async () => {
 							</div>
 
 							{medicines.map((medicine, idx) => (
-								<article key={medicine.id} className="print-friendly rounded-3xl border border-border/80 bg-white p-5 shadow-sm space-y-3">
+								<article key={medicine.id} className="print-friendly rounded-3xl border border-border/80 bg-white p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
 									<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 										<div>
 											<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Препарат {idx + 1}</p>
@@ -618,7 +635,7 @@ const handleDownloadPdf = async () => {
 										</div>
 									</div>
 
-									<div className="grid gap-3 md:grid-cols-2 text-sm text-muted-foreground">
+									<div className="grid gap-2 sm:gap-3 md:grid-cols-2 text-sm text-muted-foreground">
 										{medicine.prescribedBy && <p><span className="font-semibold text-foreground">Назначил:</span> {medicine.prescribedBy}</p>}
 										{medicine.prescribedDate && <p><span className="font-semibold text-foreground">Назначение:</span> {formatDate(medicine.prescribedDate)}</p>}
 										{medicine.refillDate && <p><span className="font-semibold text-foreground">Обновить рецепт:</span> {formatDate(medicine.refillDate)}</p>}
@@ -628,12 +645,43 @@ const handleDownloadPdf = async () => {
 						</section>
 					)}
 
-					<footer className="print-friendly mt-12 rounded-3xl border border-border bg-white p-6 text-center text-sm text-muted-foreground">
+					<footer className="print-friendly mt-10 sm:mt-12 rounded-3xl border border-border bg-white p-4 sm:p-6 text-center text-xs sm:text-sm text-muted-foreground">
 						<p className="text-base font-semibold text-foreground">Рука помощи • Социальный навигатор</p>
 						<p className="mt-2">© 2024 • Регион {user?.region || '—'} • Горячая линия 122</p>
 					</footer>
 				</div>
 			)}
+			<div className="no-print md:hidden fixed inset-x-0 bottom-0 z-40 bg-white/95 backdrop-blur border-t border-border/80">
+				<div className="app-shell py-3 flex flex-col gap-2 safe-area-bottom">
+					{qrResult?.normalizedPhone && (
+						<p className="text-xs text-muted-foreground truncate">
+							QR: {qrResult.normalizedPhone}
+						</p>
+					)}
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							size="lg"
+							className="flex-1"
+							onClick={handleDownloadPdf}
+							disabled={downloading}
+						>
+							<Download className="w-5 h-5 mr-2" />
+							{downloading ? 'Формируем...' : 'PDF'}
+						</Button>
+						<Button
+							variant="accent"
+							size="lg"
+							className="flex-1"
+							onClick={handlePrint}
+							disabled={!hasQr}
+						>
+							<Printer className="w-5 h-5 mr-2" />
+							Печать
+						</Button>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };
